@@ -4,11 +4,29 @@ const fs = require('fs');
 
 const GuardianEngine = require('../engine/guardian');
 
+// Prevent GPU cache file lock conflicts on Windows
+app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+
+// Enforce single instance (like Google Drive)
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+if (!gotSingleInstanceLock) {
+  app.quit();
+  process.exit(0);
+}
+
 let mainWindow = null;
 let popupWindow = null;
 let tray = null;
 let coordinator = null;
 let isQuitting = false;
+
+app.on('second-instance', () => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  }
+});
 
 const iconPath = path.join(__dirname, '../../assets/icon.png');
 
