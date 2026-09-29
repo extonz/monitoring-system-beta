@@ -7,194 +7,229 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="flyout-container">
+  <div class="apple-window">
 
-    <!-- Minimal Header -->
-    <header class="minimal-header">
-      <div class="header-left">
-        <div class="app-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <!-- macOS Style Titlebar / Header -->
+    <header class="mac-header">
+      <div class="mac-header-title">
+        <div class="mac-app-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
         </div>
-        <span class="app-name">Guardian</span>
-        <span class="protection-pill" id="protection-pill">System-Wide Active</span>
+        <span class="mac-app-label">Guardian</span>
       </div>
 
-      <div class="header-right">
-        <!-- Airbag Test Button -->
-        <button id="btn-quick-test" class="icon-btn" title="Test Airbag (Simulate Anomaly)">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M10 2v7.31M14 9.3V1.99M8.5 2h7M14 9.3a6.5 6.5 0 1 1-4 0"/>
-            <path d="M5.52 16h12.96"/>
+      <div class="mac-header-actions">
+        <!-- Airbag Test -->
+        <button id="btn-quick-test" class="mac-icon-btn" title="Simulate File Anomaly">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
         </button>
 
         <!-- Theme Toggle -->
-        <button id="theme-toggle" class="icon-btn" title="Toggle Theme">
-          <svg id="theme-icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button id="theme-toggle" class="mac-icon-btn" title="Toggle Appearance">
+          <svg id="theme-icon-sun" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="19.78" y2="4.22"></line>
           </svg>
-          <svg id="theme-icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+          <svg id="theme-icon-moon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         </button>
 
-        <!-- Minimize to Tray Button -->
-        <button id="btn-close-window" class="icon-btn close-btn" title="Hide to Tray">✕</button>
+        <!-- Close / Hide to Tray -->
+        <button id="btn-close-window" class="mac-close-btn" title="Close Window">✕</button>
       </div>
     </header>
 
     <!-- Main Content Area -->
-    <main class="flyout-body">
+    <main class="mac-content">
 
-      <!-- ================= VIEW 1: MINIMAL DASHBOARD ================= -->
-      <section id="view-dashboard" class="view-pane active">
-        <!-- Calm Hero Status -->
-        <div class="minimal-status">
-          <div class="status-dot normal" id="status-dot"></div>
-          <h1 class="status-heading" id="status-heading">Everything looks good</h1>
-          <p class="status-subheading" id="status-subheading">All system drives and user folders actively protected.</p>
+      <!-- ================= 1. DASHBOARD VIEW ================= -->
+      <section id="view-dashboard" class="mac-view active">
+        
+        <!-- Status Hero (Apple Security Style) -->
+        <div class="mac-hero">
+          <div class="mac-status-badge" id="status-glyph-wrap">
+            <svg class="mac-status-svg" id="status-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+          </div>
+          <h1 class="mac-hero-title" id="status-heading">Your Mac is Protected</h1>
+          <p class="mac-hero-subtitle" id="status-subheading">Behavioral monitoring active across all drives and folders.</p>
         </div>
 
-        <!-- Scope Badge -->
-        <div class="scope-bar">
-          <div class="scope-label">SCOPE</div>
-          <div class="scope-text" id="scope-display">All Folders & System Drives (C:\, User Folders)</div>
+        <!-- Incident Notification Card (Visible when contained) -->
+        <div id="quick-incident-bar" class="mac-incident-alert" style="display: none;">
+          <div class="mac-alert-icon">⚠</div>
+          <div class="mac-alert-text">
+            <div class="mac-alert-title" id="qib-title">Activity Paused</div>
+            <div class="mac-alert-sub" id="qib-sub">Suspicious file modifications were temporarily held.</div>
+          </div>
+          <button class="mac-btn-alert" id="btn-view-incident-pane">Review</button>
         </div>
 
-        <!-- Incident Quick Bar (Appears when contained) -->
-        <div id="quick-incident-bar" class="quick-incident-bar" style="display: none;">
-          <div class="qib-content">
-            <span class="qib-tag">PAUSED</span>
-            <div class="qib-text">
-              <strong id="qib-title">Activity paused</strong>
-              <span id="qib-sub">Suspicious rapid modifications detected.</span>
+        <!-- Group: System Overview -->
+        <div class="mac-group">
+          <div class="mac-group-label">OVERVIEW</div>
+          <div class="mac-inset-box">
+            <div class="mac-row">
+              <span class="mac-row-label">System Scope</span>
+              <span class="mac-row-value" id="scope-display">All Folders & Drives</span>
+            </div>
+            <div class="mac-row">
+              <span class="mac-row-label">Protection State</span>
+              <span class="mac-row-value-green" id="protection-label">Active</span>
             </div>
           </div>
-          <button class="btn btn-sm btn-primary" id="btn-view-incident-pane">Review</button>
         </div>
 
-        <!-- Recent Activity Section -->
-        <div class="section-box">
-          <div class="section-header">
-            <span class="section-title">Recent Activity</span>
-            <span class="section-stat" id="activity-count">Real-time</span>
+        <!-- Group: Recent Activity -->
+        <div class="mac-group">
+          <div class="mac-group-header">
+            <span class="mac-group-label">RECENT ACTIVITY</span>
+            <button class="mac-link-btn" id="btn-show-timeline">History</button>
           </div>
-          <div class="activity-feed" id="activity-feed">
+          <div class="mac-inset-box" id="activity-feed">
             <!-- Dynamically populated rows -->
           </div>
         </div>
 
-        <!-- Bottom Controls -->
-        <div class="bottom-actions">
-          <button class="btn-text" id="btn-show-timeline">View activity log →</button>
-          <button class="btn btn-sm btn-secondary" id="btn-sim-tamper">Simulate Burst Alert</button>
+        <!-- Bottom Actions -->
+        <div class="mac-footer-actions">
+          <button class="mac-btn-secondary" id="btn-sim-tamper">Test Behavioral Airbag</button>
         </div>
+
       </section>
 
-      <!-- ================= VIEW 2: INCIDENT DETAILS ================= -->
-      <section id="view-incident" class="view-pane">
-        <div class="incident-top">
-          <button class="btn-back" id="btn-back-to-dash">← Back</button>
-          <span class="badge badge-warning" id="inc-status-tag">ACTIVITY PAUSED</span>
+      <!-- ================= 2. INCIDENT VIEW ================= -->
+      <section id="view-incident" class="mac-view">
+        <div class="mac-sub-header">
+          <button class="mac-back-btn" id="btn-back-to-dash">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+            Back
+          </button>
+          <span class="mac-tag-paused">PAUSED</span>
         </div>
 
-        <div class="incident-card">
-          <h2 class="inc-title" id="inc-title">Unusual activity detected</h2>
-          <div class="inc-proc-tag" id="inc-proc-tag">unknown_payload.exe</div>
-          <p class="inc-desc" id="inc-desc">A process modified an unusually large number of files in a few seconds.</p>
+        <div class="mac-hero" style="padding-top: 8px;">
+          <div class="mac-status-badge alert" id="inc-glyph-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <h1 class="mac-hero-title" id="inc-title">Unusual Activity Detected</h1>
+          <p class="mac-hero-subtitle" id="inc-desc">A background process caused a large volume of changes in seconds.</p>
+        </div>
 
-          <!-- Metrics summary -->
-          <div class="metrics-grid">
-            <div class="metric-box">
-              <span class="metric-val" id="metric-modified">0</span>
-              <span class="metric-lbl">files modified</span>
+        <!-- Metrics Group -->
+        <div class="mac-group">
+          <div class="mac-group-label">INCIDENT SUMMARY</div>
+          <div class="mac-inset-box">
+            <div class="mac-row">
+              <span class="mac-row-label">Process</span>
+              <span class="mac-row-value-mono" id="inc-proc-tag">unknown_payload.exe</span>
             </div>
-            <div class="metric-box">
-              <span class="metric-val" id="metric-deleted">0</span>
-              <span class="metric-lbl">files deleted</span>
+            <div class="mac-row">
+              <span class="mac-row-label">Files Modified</span>
+              <span class="mac-row-value" id="metric-modified">0</span>
             </div>
-            <div class="metric-box">
-              <span class="metric-val" id="metric-status">PAUSED</span>
-              <span class="metric-lbl">process state</span>
+            <div class="mac-row">
+              <span class="mac-row-label">Files Deleted</span>
+              <span class="mac-row-value" id="metric-deleted">0</span>
+            </div>
+            <div class="mac-row">
+              <span class="mac-row-label">Process State</span>
+              <span class="mac-row-value-amber" id="metric-status">Suspended</span>
             </div>
           </div>
+        </div>
 
-          <!-- Why unusual -->
-          <div class="inc-reasons-box">
-            <div class="reasons-heading">Why this was unusual:</div>
-            <ul class="reasons-list" id="inc-reasons">
-              <li>Modification rate significantly higher than normal baseline.</li>
-              <li>User document locations were targeted.</li>
-              <li>Unverified binary signature.</li>
+        <!-- Reasons Group -->
+        <div class="mac-group">
+          <div class="mac-group-label">OBSERVATIONS</div>
+          <div class="mac-inset-box mac-reasons-box">
+            <ul class="mac-reasons-list" id="inc-reasons">
+              <li>Modification rate significantly higher than baseline.</li>
+              <li>User document directories were targeted.</li>
+              <li>Executable is unverified.</li>
             </ul>
           </div>
-
-          <!-- Recovery Progress Bar (hidden unless recovering) -->
-          <div id="inc-recovery-progress" class="recovery-progress-box" style="display: none;">
-            <div class="progress-info">
-              <span>Restoring verified files...</span>
-              <span id="inc-progress-counter">0 / 0</span>
-            </div>
-            <div class="progress-track">
-              <div class="progress-fill" id="inc-progress-bar" style="width: 0%;"></div>
-            </div>
-          </div>
-
-          <!-- Action buttons -->
-          <div class="inc-action-buttons">
-            <button class="btn btn-success" id="btn-incident-recover">
-              ✓ Restore Files Now
-            </button>
-            <button class="btn btn-secondary" id="btn-incident-allow">
-              Allow Activity (False Positive)
-            </button>
-          </div>
-
-          <!-- Collapsible forensics -->
-          <details class="forensic-accordion">
-            <summary>Technical details ▸</summary>
-            <div class="forensic-rows" id="forensic-rows">
-              <div class="f-row">
-                <span>Executable:</span>
-                <strong id="f-path">unknown_payload.exe</strong>
-              </div>
-              <div class="f-row">
-                <span>PID:</span>
-                <strong id="f-pid">9942</strong>
-              </div>
-              <div class="f-row">
-                <span>Signature:</span>
-                <strong id="f-sig">Unsigned</strong>
-              </div>
-              <div class="f-row">
-                <span>Hash:</span>
-                <strong id="f-hash">e3b0c442...</strong>
-              </div>
-            </div>
-          </details>
         </div>
+
+        <!-- Recovery Progress (if restoring) -->
+        <div id="inc-recovery-progress" class="mac-progress-box" style="display: none;">
+          <div class="mac-progress-label">
+            <span>Restoring previous file states...</span>
+            <span id="inc-progress-counter">0 / 0</span>
+          </div>
+          <div class="mac-progress-track">
+            <div class="mac-progress-fill" id="inc-progress-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Apple Action Buttons -->
+        <div class="mac-incident-buttons">
+          <button class="mac-btn-primary" id="btn-incident-recover">Restore Previous Files</button>
+          <button class="mac-btn-tertiary" id="btn-incident-allow">Allow Process & Resume</button>
+        </div>
+
+        <!-- Forensics Details -->
+        <details class="mac-details">
+          <summary>Technical Details</summary>
+          <div class="mac-inset-box mac-details-box">
+            <div class="mac-row">
+              <span class="mac-row-label">Path</span>
+              <span class="mac-row-value-mono" id="f-path">unknown_payload.exe</span>
+            </div>
+            <div class="mac-row">
+              <span class="mac-row-label">PID</span>
+              <span class="mac-row-value-mono" id="f-pid">9942</span>
+            </div>
+            <div class="mac-row">
+              <span class="mac-row-label">Signature</span>
+              <span class="mac-row-value" id="f-sig">Unsigned</span>
+            </div>
+            <div class="mac-row">
+              <span class="mac-row-label">SHA-256</span>
+              <span class="mac-row-value-mono" id="f-hash">e3b0c442...</span>
+            </div>
+          </div>
+        </details>
       </section>
 
-      <!-- ================= VIEW 3: TIMELINE LOG ================= -->
-      <section id="view-timeline" class="view-pane">
-        <div class="incident-top">
-          <button class="btn-back" id="btn-back-from-timeline">← Back</button>
-          <span class="section-title">Timeline Log</span>
+      <!-- ================= 3. TIMELINE VIEW ================= -->
+      <section id="view-timeline" class="mac-view">
+        <div class="mac-sub-header">
+          <button class="mac-back-btn" id="btn-back-from-timeline">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+            Back
+          </button>
+          <span class="mac-group-label">EVENT TIMELINE</span>
         </div>
-        <div class="timeline-scroll" id="timeline-list">
-          <!-- Populated dynamically -->
+
+        <div class="mac-inset-box mac-timeline-container" id="timeline-list">
+          <!-- Dynamically populated -->
         </div>
       </section>
 
     </main>
 
-    <!-- Minimal Status Footer -->
-    <footer class="minimal-footer">
-      <span>100% Local Protection • Zero Telemetry</span>
+    <!-- macOS Inset Footer -->
+    <footer class="mac-footer">
+      <span>Protected by Guardian • Local Execution Only</span>
     </footer>
   </div>
 

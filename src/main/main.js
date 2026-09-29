@@ -22,15 +22,15 @@ function getTrayIcon() {
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
-    width: 440,
-    height: 620,
-    minWidth: 400,
-    minHeight: 520,
+    width: 380,
+    height: 540,
+    minWidth: 360,
+    minHeight: 480,
     title: 'Guardian',
     icon: getTrayIcon(),
     show: true,
     autoHideMenuBar: true,
-    backgroundColor: '#0b0f19',
+    backgroundColor: '#1c1c1e',
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.js'),
       contextIsolation: true,
@@ -62,11 +62,11 @@ function showToastPopup(incident) {
   const primaryDisplay = screen.getPrimaryDisplay();
   const { width, height } = primaryDisplay.workAreaSize;
 
-  const popupWidth = 380;
-  const popupHeight = 185;
+  const popupWidth = 360;
+  const popupHeight = 160;
   const margin = 16;
 
-  // Position at bottom-right corner just above Windows taskbar (Avast style)
+  // Position at bottom-right corner just above Windows taskbar (macOS notification style)
   const x = Math.round(width - popupWidth - margin);
   const y = Math.round(height - popupHeight - margin);
 

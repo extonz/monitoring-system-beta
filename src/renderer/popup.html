@@ -3,38 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guardian Alert</title>
+  <title>Guardian Notification</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="toast-card">
-    <div class="toast-header">
-      <div class="toast-brand">
-        <div class="shield-badge">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+  <div class="mac-toast-card">
+    <div class="mac-toast-header">
+      <div class="mac-toast-app">
+        <div class="mac-toast-icon">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
         </div>
-        <span class="toast-appname">GUARDIAN AIRBAG</span>
+        <span class="mac-toast-appname">GUARDIAN</span>
+        <span class="mac-toast-dot">•</span>
+        <span class="mac-toast-time">now</span>
       </div>
-      <button class="toast-close" id="btn-close" title="Dismiss">×</button>
+      <button class="mac-toast-close" id="btn-close" title="Dismiss">✕</button>
     </div>
 
-    <div class="toast-body">
-      <div class="toast-headline">
-        <span class="warning-icon">⚠</span>
-        <strong id="toast-title">Unusual activity detected</strong>
-      </div>
-      <p class="toast-message" id="toast-msg">
-        <span class="proc-name" id="toast-proc">unknown_payload.exe</span> modified files at an unusually high rate.
+    <div class="mac-toast-body">
+      <div class="mac-toast-title" id="toast-title">Unusual Activity Paused</div>
+      <p class="mac-toast-desc" id="toast-msg">
+        <span class="mac-toast-proc" id="toast-proc">unknown_payload.exe</span> was paused after modifying files at an unusually high rate.
       </p>
-      <div class="toast-subtext">The activity was paused while we investigate.</div>
     </div>
 
-    <div class="toast-actions">
-      <button class="btn btn-details" id="btn-details">View Details</button>
-      <button class="btn btn-recover" id="btn-recover">Restore Files</button>
-      <button class="btn btn-allow" id="btn-allow">Allow</button>
+    <div class="mac-toast-actions">
+      <button class="mac-toast-btn secondary" id="btn-details">Review</button>
+      <button class="mac-toast-btn primary" id="btn-recover">Restore Files</button>
+      <button class="mac-toast-btn tertiary" id="btn-allow">Allow</button>
     </div>
   </div>
 

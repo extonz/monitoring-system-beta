@@ -1,39 +1,44 @@
-// Guardian Minimalist Desktop Utility Logic
+// Guardian — Apple macOS Style Renderer Logic
 
 document.addEventListener('DOMContentLoaded', async () => {
   const api = window.guardianAPI;
 
-  // View Panes
+  // View Containers
   const viewDashboard = document.getElementById('view-dashboard');
   const viewIncident = document.getElementById('view-incident');
   const viewTimeline = document.getElementById('view-timeline');
 
-  // Header Elements
+  // Titlebar controls
   const btnCloseWindow = document.getElementById('btn-close-window');
   const btnQuickTest = document.getElementById('btn-quick-test');
   const themeToggle = document.getElementById('theme-toggle');
   const themeIconSun = document.getElementById('theme-icon-sun');
   const themeIconMoon = document.getElementById('theme-icon-moon');
-  const protectionPill = document.getElementById('protection-pill');
 
-  // Dashboard Elements
-  const statusDot = document.getElementById('status-dot');
+  // Hero Status
+  const statusGlyphWrap = document.getElementById('status-glyph-wrap');
+  const statusSvg = document.getElementById('status-svg');
   const statusHeading = document.getElementById('status-heading');
   const statusSubheading = document.getElementById('status-subheading');
+  const protectionLabel = document.getElementById('protection-label');
   const scopeDisplay = document.getElementById('scope-display');
+
+  // Quick Incident Banner
   const quickIncidentBar = document.getElementById('quick-incident-bar');
   const qibTitle = document.getElementById('qib-title');
   const qibSub = document.getElementById('qib-sub');
   const btnViewIncidentPane = document.getElementById('btn-view-incident-pane');
+
+  // Recent Activity Feed
   const activityFeed = document.getElementById('activity-feed');
   const btnShowTimeline = document.getElementById('btn-show-timeline');
   const btnSimTamper = document.getElementById('btn-sim-tamper');
 
-  // Incident View Elements
+  // Incident View
   const btnBackToDash = document.getElementById('btn-back-to-dash');
   const incTitle = document.getElementById('inc-title');
-  const incProcTag = document.getElementById('inc-proc-tag');
   const incDesc = document.getElementById('inc-desc');
+  const incProcTag = document.getElementById('inc-proc-tag');
   const metricModified = document.getElementById('metric-modified');
   const metricDeleted = document.getElementById('metric-deleted');
   const metricStatus = document.getElementById('metric-status');
@@ -48,13 +53,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const fSig = document.getElementById('f-sig');
   const fHash = document.getElementById('f-hash');
 
-  // Timeline View Elements
+  // Timeline View
   const btnBackFromTimeline = document.getElementById('btn-back-from-timeline');
   const timelineList = document.getElementById('timeline-list');
 
-  let currentIncident = null;
-
-  // 1. Navigation
+  // Navigation
   function showView(viewName) {
     [viewDashboard, viewIncident, viewTimeline].forEach(v => v.classList.remove('active'));
     if (viewName === 'incident') viewIncident.classList.add('active');
@@ -71,20 +74,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   btnShowTimeline.addEventListener('click', () => showView('timeline'));
   btnViewIncidentPane.addEventListener('click', () => showView('incident'));
 
-  // Close / minimize to tray
+  // Close to tray
   btnCloseWindow.addEventListener('click', () => {
-    if (api && api.hideWindow) {
-      api.hideWindow();
-    } else {
-      window.close();
-    }
+    if (api && api.hideWindow) api.hideWindow();
+    else window.close();
   });
 
-  // 2. Theme Toggle
+  // Appearance Theme
   function initTheme() {
-    const savedTheme = localStorage.getItem('guardian-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeIcons(savedTheme);
+    const saved = localStorage.getItem('guardian-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    updateThemeIcons(saved);
   }
 
   function updateThemeIcons(theme) {
@@ -98,57 +98,57 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   themeToggle.addEventListener('click', () => {
-    const current = document.documentElement.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('guardian-theme', next);
     updateThemeIcons(next);
   });
 
-  // 3. Render State
+  // State Rendering
   function renderState(state) {
     if (!state) return;
 
-    // Scope text
     if (state.monitoredPaths && state.monitoredPaths.length > 0) {
-      scopeDisplay.textContent = `System-Wide (${state.monitoredPaths.length} locations including Desktop, Documents, System Drives)`;
+      scopeDisplay.textContent = 'All Drives & User Folders';
     }
-
-    // Hero dot & text
-    statusDot.className = 'status-dot';
-    statusDot.classList.add(state.state.toLowerCase());
 
     if (state.state === 'NORMAL') {
-      statusHeading.textContent = 'Everything looks good';
-      statusSubheading.textContent = 'All drives and user folders actively protected.';
+      statusHeading.textContent = 'Your Computer is Protected';
+      statusSubheading.textContent = 'Continuous behavioral monitoring is active.';
+      protectionLabel.textContent = 'Active';
+      protectionLabel.className = 'mac-row-value-green';
+      statusGlyphWrap.className = 'mac-status-badge';
+      statusSvg.innerHTML = '<path d="M20 6L9 17l-5-5"/>';
       quickIncidentBar.style.display = 'none';
-      protectionPill.textContent = 'System-Wide Active';
-      protectionPill.style.color = 'var(--color-success)';
     } else if (state.state === 'OBSERVING') {
-      statusHeading.textContent = 'Monitoring elevated activity';
-      statusSubheading.textContent = 'Analyzing system file operations.';
+      statusHeading.textContent = 'Monitoring Activity';
+      statusSubheading.textContent = 'Observing file operation patterns.';
+      protectionLabel.textContent = 'Observing';
+      protectionLabel.className = 'mac-row-value-amber';
       quickIncidentBar.style.display = 'none';
     } else if (state.state === 'CONTAINED' || state.state === 'CRITICAL' || state.state === 'SUSPICIOUS') {
-      statusHeading.textContent = 'Activity paused';
-      statusSubheading.textContent = 'A process was paused to protect your files.';
+      statusHeading.textContent = 'Suspicious Activity Paused';
+      statusSubheading.textContent = 'A process was paused to preserve file integrity.';
+      protectionLabel.textContent = 'Intervened';
+      protectionLabel.className = 'mac-row-value-amber';
+      statusGlyphWrap.className = 'mac-status-badge alert';
+      statusSvg.innerHTML = '<line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
       quickIncidentBar.style.display = 'flex';
-      protectionPill.textContent = 'Airbag Engaged';
-      protectionPill.style.color = 'var(--color-danger)';
     } else if (state.state === 'RECOVERED') {
-      statusHeading.textContent = 'System recovered';
-      statusSubheading.textContent = 'All altered files were restored and verified.';
+      statusHeading.textContent = 'System Restored';
+      statusSubheading.textContent = 'All changed files were verified and recovered.';
+      protectionLabel.textContent = 'Restored';
+      protectionLabel.className = 'mac-row-value-green';
+      statusGlyphWrap.className = 'mac-status-badge';
+      statusSvg.innerHTML = '<path d="M20 6L9 17l-5-5"/>';
       quickIncidentBar.style.display = 'none';
-      protectionPill.textContent = 'System Restored';
-      protectionPill.style.color = 'var(--color-success)';
     }
 
-    // Populate incident details if present
     if (state.activeIncident) {
-      currentIncident = state.activeIncident;
-      renderIncident(currentIncident);
+      renderIncident(state.activeIncident);
     }
 
-    // Render feed
     renderFeed(state.recentEvents || []);
   }
 
@@ -161,14 +161,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     qibTitle.textContent = `${proc.name} paused`;
     metricModified.textContent = diff.modified ? diff.modified.length : 0;
     metricDeleted.textContent = diff.deleted ? diff.deleted.length : 0;
-    metricStatus.textContent = inc.status || 'PAUSED';
+    metricStatus.textContent = inc.status || 'Paused';
 
-    // Reasons
     incReasons.innerHTML = '';
     const reasons = (inc.evaluation && inc.evaluation.reasons) || [
-      'Unusually high file modification rate.',
-      'User document areas affected.',
-      'Unsigned executable binary.',
+      'Modification rate significantly higher than baseline.',
+      'User document directories were targeted.',
+      'Executable binary is unverified.',
     ];
     reasons.forEach(r => {
       const li = document.createElement('li');
@@ -176,7 +175,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       incReasons.appendChild(li);
     });
 
-    // Forensics
     fPath.textContent = proc.path || proc.name;
     fPid.textContent = proc.pid || 'N/A';
     fSig.textContent = proc.signature || 'Unverified';
@@ -184,89 +182,78 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (inc.recovered) {
       btnIncidentRecover.disabled = true;
-      btnIncidentRecover.textContent = '✓ Files Restored & Verified';
+      btnIncidentRecover.textContent = 'Files Successfully Restored';
     } else {
       btnIncidentRecover.disabled = false;
-      btnIncidentRecover.textContent = '✓ Restore Files Now';
+      btnIncidentRecover.textContent = 'Restore Previous Files';
     }
   }
 
   function renderFeed(events) {
     activityFeed.innerHTML = '';
     if (events.length === 0) {
-      activityFeed.innerHTML = '<div style="font-size:0.75rem; color:var(--text-dim); text-align:center; padding:10px;">Monitoring active. No unusual events.</div>';
+      activityFeed.innerHTML = '<div style="font-size:11.5px; color:var(--text-tertiary); text-align:center; padding:10px;">Monitoring active. No unusual events.</div>';
       return;
     }
 
-    events.slice(0, 5).forEach(evt => {
+    events.slice(0, 4).forEach(evt => {
       const row = document.createElement('div');
-      row.className = 'feed-row';
+      row.className = 'mac-feed-item';
 
-      let dotClass = '';
-      let badgeClass = '';
-      if (evt.state === 'CRITICAL' || evt.state === 'CONTAINED') {
-        dotClass = 'danger';
-        badgeClass = 'danger';
-      } else if (evt.state === 'SUSPICIOUS' || evt.state === 'OBSERVING') {
-        dotClass = 'warning';
-        badgeClass = 'warning';
-      }
+      const isAlert = evt.state === 'CRITICAL' || evt.state === 'CONTAINED' || evt.state === 'SUSPICIOUS';
 
       row.innerHTML = `
-        <div class="feed-row-left">
-          <span class="feed-row-dot ${dotClass}"></span>
-          <div>
-            <span class="feed-name">${evt.process ? evt.process.name : evt.title}</span>
-            <div class="feed-desc">${evt.description.substring(0, 48)}...</div>
-          </div>
+        <div class="mac-feed-left">
+          <span class="mac-dot ${isAlert ? 'alert' : ''}"></span>
+          <span class="mac-feed-name">${evt.process ? evt.process.name : evt.title}</span>
         </div>
-        <span class="feed-badge ${badgeClass}">${evt.state}</span>
+        <span class="mac-feed-time">${evt.timeFormatted}</span>
       `;
       activityFeed.appendChild(row);
     });
   }
 
   async function loadTimeline() {
-    timelineList.innerHTML = '<div style="font-size:0.75rem; color:var(--text-dim); padding:10px;">Loading timeline...</div>';
-    const events = await api.getEvents({ limit: 25 });
+    timelineList.innerHTML = '<div style="font-size:11px; color:var(--text-tertiary); padding:10px;">Loading timeline...</div>';
+    const events = await api.getEvents({ limit: 20 });
     timelineList.innerHTML = '';
 
     if (!events || events.length === 0) {
-      timelineList.innerHTML = '<div style="font-size:0.75rem; color:var(--text-dim); padding:10px;">No timeline entries recorded.</div>';
+      timelineList.innerHTML = '<div style="font-size:11px; color:var(--text-tertiary); padding:10px;">No timeline entries recorded.</div>';
       return;
     }
 
     events.forEach(e => {
       const item = document.createElement('div');
-      item.className = 'tl-item';
+      item.className = 'mac-tl-item';
       item.innerHTML = `
-        <div class="tl-item-top">
-          <span class="tl-item-title">${e.title}</span>
-          <span class="tl-item-time">${e.timeFormatted}</span>
+        <div class="mac-tl-top">
+          <span class="mac-tl-title">${e.title}</span>
+          <span class="mac-tl-time">${e.timeFormatted}</span>
         </div>
-        <div class="tl-item-desc">${e.description}</div>
+        <div class="mac-tl-desc">${e.description}</div>
       `;
       timelineList.appendChild(item);
     });
   }
 
-  // 4. Simulations & Recovery Actions
-  async function triggerTamperSimulation() {
+  // Simulation & Actions
+  async function triggerSimulation() {
     btnSimTamper.disabled = true;
     btnSimTamper.textContent = 'Simulating...';
     await api.runScenario('SETUP_BASELINE');
     await api.runScenario('SUSPICIOUS_BURST');
     btnSimTamper.disabled = false;
-    btnSimTamper.textContent = 'Simulate Burst Alert';
+    btnSimTamper.textContent = 'Test Behavioral Airbag';
     showView('incident');
   }
 
-  btnSimTamper.addEventListener('click', triggerTamperSimulation);
-  btnQuickTest.addEventListener('click', triggerTamperSimulation);
+  btnSimTamper.addEventListener('click', triggerSimulation);
+  btnQuickTest.addEventListener('click', triggerSimulation);
 
   btnIncidentRecover.addEventListener('click', async () => {
     incRecoveryProgress.style.display = 'block';
-    incProgressBar.style.width = '20%';
+    incProgressBar.style.width = '30%';
     incProgressCounter.textContent = 'Restoring...';
 
     const res = await api.executeRecovery();
@@ -276,7 +263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => {
       incRecoveryProgress.style.display = 'none';
       btnIncidentRecover.disabled = true;
-      btnIncidentRecover.textContent = `✓ ${res.totalRestored} Files Restored`;
+      btnIncidentRecover.textContent = 'Files Successfully Restored';
     }, 400);
   });
 
@@ -285,19 +272,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     showView('dashboard');
   });
 
-  // Reactive updates
-  api.onStateChanged((state) => {
-    renderState(state);
-  });
+  api.onStateChanged((state) => renderState(state));
 
-  // Handle direct navigation request (e.g. from popup toast "View Details")
   if (api.onNavigate) {
-    api.onNavigate((view) => {
-      showView(view);
-    });
+    api.onNavigate((view) => showView(view));
   }
 
-  // Initialize
   initTheme();
   const initial = await api.getState();
   renderState(initial);
