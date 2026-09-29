@@ -20,8 +20,18 @@ function createWindow() {
       nodeIntegration: false,
       sandbox: false,
     },
+    show: false,
     autoHideMenuBar: true,
     backgroundColor: '#0f172a',
+  });
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+    mainWindow.focus();
+  });
+
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.error('Failed to load UI:', errorCode, errorDescription);
   });
 
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
