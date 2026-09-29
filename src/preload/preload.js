@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld('guardianAPI', {
   runScenario: (scenarioType) => ipcRenderer.invoke('run-scenario', scenarioType),
   getEvents: (filter) => ipcRenderer.invoke('get-events', filter),
   selectFolder: () => ipcRenderer.invoke('select-folder'),
+  hideWindow: () => ipcRenderer.invoke('hide-window'),
+  openMainWindow: (view) => ipcRenderer.invoke('open-main-window', view),
   onStateChanged: (callback) => {
     const subscription = (event, value) => callback(value);
     ipcRenderer.on('state-changed', subscription);
@@ -18,5 +20,10 @@ contextBridge.exposeInMainWorld('guardianAPI', {
     const subscription = (event, value) => callback(value);
     ipcRenderer.on('recovery-progress', subscription);
     return () => ipcRenderer.removeListener('recovery-progress', subscription);
+  },
+  onNavigate: (callback) => {
+    const subscription = (event, view) => callback(view);
+    ipcRenderer.on('navigate-view', subscription);
+    return () => ipcRenderer.removeListener('navigate-view', subscription);
   },
 });

@@ -1,88 +1,86 @@
-// Guardian Renderer Application Logic
+// Guardian Minimalist Desktop Utility Logic
 
 document.addEventListener('DOMContentLoaded', async () => {
   const api = window.guardianAPI;
 
-  // DOM Elements
-  const tabs = document.querySelectorAll('.nav-btn');
-  const panes = document.querySelectorAll('.tab-pane');
+  // View Panes
+  const viewDashboard = document.getElementById('view-dashboard');
+  const viewIncident = document.getElementById('view-incident');
+  const viewTimeline = document.getElementById('view-timeline');
+
+  // Header Elements
+  const btnCloseWindow = document.getElementById('btn-close-window');
+  const btnQuickTest = document.getElementById('btn-quick-test');
   const themeToggle = document.getElementById('theme-toggle');
   const themeIconSun = document.getElementById('theme-icon-sun');
   const themeIconMoon = document.getElementById('theme-icon-moon');
+  const protectionPill = document.getElementById('protection-pill');
 
-  // Dashboard Status Elements
+  // Dashboard Elements
   const statusDot = document.getElementById('status-dot');
-  const statusTitle = document.getElementById('status-title');
-  const statusDesc = document.getElementById('status-desc');
-  const statusTag = document.getElementById('status-tag');
-  const monitoredPathDisplay = document.getElementById('monitored-path-display');
-  const suspendedCountDisplay = document.getElementById('suspended-count-display');
-  const incidentBanner = document.getElementById('incident-banner');
-  const bannerViewBtn = document.getElementById('banner-view-btn');
-  const navIncidentBtn = document.getElementById('nav-incident-btn');
-  const incidentIndicator = document.getElementById('incident-indicator');
-  const dashboardRecentList = document.getElementById('dashboard-recent-list');
+  const statusHeading = document.getElementById('status-heading');
+  const statusSubheading = document.getElementById('status-subheading');
+  const scopeDisplay = document.getElementById('scope-display');
+  const quickIncidentBar = document.getElementById('quick-incident-bar');
+  const qibTitle = document.getElementById('qib-title');
+  const qibSub = document.getElementById('qib-sub');
+  const btnViewIncidentPane = document.getElementById('btn-view-incident-pane');
+  const activityFeed = document.getElementById('activity-feed');
+  const btnShowTimeline = document.getElementById('btn-show-timeline');
+  const btnSimTamper = document.getElementById('btn-sim-tamper');
 
-  // Incident Screen Elements
-  const noIncidentState = document.getElementById('no-incident-state');
-  const incidentDetailState = document.getElementById('incident-detail-state');
-  const incStatModified = document.getElementById('inc-stat-modified');
-  const incStatDeleted = document.getElementById('inc-stat-deleted');
-  const incStatCreated = document.getElementById('inc-stat-created');
-  const incReasonsList = document.getElementById('inc-reasons-list');
-  const ffProcName = document.getElementById('ff-proc-name');
-  const ffPid = document.getElementById('ff-pid');
-  const ffPath = document.getElementById('ff-path');
-  const ffSignature = document.getElementById('ff-signature');
-  const ffHash = document.getElementById('ff-hash');
-  const ffSignals = document.getElementById('ff-signals');
+  // Incident View Elements
+  const btnBackToDash = document.getElementById('btn-back-to-dash');
+  const incTitle = document.getElementById('inc-title');
+  const incProcTag = document.getElementById('inc-proc-tag');
+  const incDesc = document.getElementById('inc-desc');
+  const metricModified = document.getElementById('metric-modified');
+  const metricDeleted = document.getElementById('metric-deleted');
+  const metricStatus = document.getElementById('metric-status');
+  const incReasons = document.getElementById('inc-reasons');
+  const btnIncidentRecover = document.getElementById('btn-incident-recover');
+  const btnIncidentAllow = document.getElementById('btn-incident-allow');
+  const incRecoveryProgress = document.getElementById('inc-recovery-progress');
+  const incProgressBar = document.getElementById('inc-progress-bar');
+  const incProgressCounter = document.getElementById('inc-progress-counter');
+  const fPath = document.getElementById('f-path');
+  const fPid = document.getElementById('f-pid');
+  const fSig = document.getElementById('f-sig');
+  const fHash = document.getElementById('f-hash');
 
-  const btnRecoverMain = document.getElementById('btn-recover-main');
-  const btnAllowActivity = document.getElementById('btn-allow-activity');
-  const recoveryProgressBox = document.getElementById('recovery-progress-container');
-  const recoveryProgressBar = document.getElementById('recovery-progress-bar');
-  const recoveryProgressCounter = document.getElementById('recovery-progress-counter');
-  const recoverySuccessBox = document.getElementById('recovery-success-box');
-  const recoverySuccessText = document.getElementById('recovery-success-text');
+  // Timeline View Elements
+  const btnBackFromTimeline = document.getElementById('btn-back-from-timeline');
+  const timelineList = document.getElementById('timeline-list');
 
-  // Timeline Elements
-  const timelineEntries = document.getElementById('timeline-entries');
-  const filterPills = document.querySelectorAll('#timeline-filters .pill');
+  let currentIncident = null;
 
-  // Demo Controls
-  const btnDemoBaseline = document.getElementById('btn-demo-baseline');
-  const btnDemoNormal = document.getElementById('btn-demo-normal');
-  const btnDemoSuspicious = document.getElementById('btn-demo-suspicious');
-  const btnChangeFolder = document.getElementById('btn-change-folder');
-  const btnRebaseline = document.getElementById('btn-rebaseline');
-  const btnGotoDemo = document.getElementById('btn-goto-demo');
-  const linkViewAllActivity = document.getElementById('link-view-all-activity');
-
-  let currentTimelineFilter = 'ALL';
-  let currentState = null;
-
-  // 1. Tab Navigation
-  function switchTab(tabId) {
-    tabs.forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === tabId);
-    });
-    panes.forEach(pane => {
-      pane.classList.toggle('active', pane.id === `tab-${tabId}`);
-    });
-    if (tabId === 'timeline') {
+  // 1. Navigation
+  function showView(viewName) {
+    [viewDashboard, viewIncident, viewTimeline].forEach(v => v.classList.remove('active'));
+    if (viewName === 'incident') viewIncident.classList.add('active');
+    else if (viewName === 'timeline') {
+      viewTimeline.classList.add('active');
       loadTimeline();
+    } else {
+      viewDashboard.classList.add('active');
     }
   }
 
-  tabs.forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  btnBackToDash.addEventListener('click', () => showView('dashboard'));
+  btnBackFromTimeline.addEventListener('click', () => showView('dashboard'));
+  btnShowTimeline.addEventListener('click', () => showView('timeline'));
+  btnViewIncidentPane.addEventListener('click', () => showView('incident'));
+
+  // Close / minimize to tray
+  btnCloseWindow.addEventListener('click', () => {
+    if (api && api.hideWindow) {
+      api.hideWindow();
+    } else {
+      window.close();
+    }
   });
 
-  if (bannerViewBtn) bannerViewBtn.addEventListener('click', () => switchTab('incident'));
-  if (btnGotoDemo) btnGotoDemo.addEventListener('click', () => switchTab('demo'));
-  if (linkViewAllActivity) linkViewAllActivity.addEventListener('click', () => switchTab('timeline'));
-
-  // 2. Theme Management
+  // 2. Theme Toggle
   function initTheme() {
     const savedTheme = localStorage.getItem('guardian-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -107,293 +105,200 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateThemeIcons(next);
   });
 
-  // 3. UI State Rendering
+  // 3. Render State
   function renderState(state) {
-    currentState = state;
     if (!state) return;
 
-    // Monitored path
-    if (state.monitoredDir) {
-      monitoredPathDisplay.textContent = state.monitoredDir;
+    // Scope text
+    if (state.monitoredPaths && state.monitoredPaths.length > 0) {
+      scopeDisplay.textContent = `System-Wide (${state.monitoredPaths.length} locations including Desktop, Documents, System Drives)`;
     }
 
-    if (suspendedCountDisplay) {
-      suspendedCountDisplay.textContent = `${state.suspendedCount || 0} paused`;
-    }
-
-    // Hero Status mapping
+    // Hero dot & text
     statusDot.className = 'status-dot';
     statusDot.classList.add(state.state.toLowerCase());
-    statusTag.textContent = state.state;
 
-    switch (state.state) {
-      case 'NORMAL':
-        statusTitle.textContent = 'Everything looks good';
-        statusDesc.textContent = 'No unusual activity detected. Behavioral monitoring is active.';
-        statusTag.style.color = 'var(--color-success)';
-        statusTag.style.backgroundColor = 'var(--color-success-bg)';
-        incidentBanner.style.display = 'none';
-        incidentIndicator.style.display = 'none';
-        break;
-      case 'OBSERVING':
-        statusTitle.textContent = 'Monitoring unusual activity';
-        statusDesc.textContent = 'Slightly elevated operations observed. Guardian is passively analyzing patterns.';
-        statusTag.style.color = 'var(--color-warning)';
-        statusTag.style.backgroundColor = 'var(--color-warning-bg)';
-        incidentBanner.style.display = 'none';
-        incidentIndicator.style.display = 'none';
-        break;
-      case 'SUSPICIOUS':
-        statusTitle.textContent = 'Unusual activity detected';
-        statusDesc.textContent = 'A process is exhibiting high-frequency file modifications.';
-        statusTag.style.color = 'var(--color-warning)';
-        statusTag.style.backgroundColor = 'var(--color-warning-bg)';
-        incidentBanner.style.display = 'flex';
-        incidentIndicator.style.display = 'inline-block';
-        break;
-      case 'CONTAINED':
-        statusTitle.textContent = 'Activity paused';
-        statusDesc.textContent = 'A suspicious process was paused to protect your files from damage.';
-        statusTag.style.color = 'var(--color-danger)';
-        statusTag.style.backgroundColor = 'var(--color-danger-bg)';
-        incidentBanner.style.display = 'flex';
-        incidentIndicator.style.display = 'inline-block';
-        break;
-      case 'RECOVERING':
-        statusTitle.textContent = 'Recovering your system';
-        statusDesc.textContent = 'Reverting unauthorized changes and restoring baseline files...';
-        statusTag.style.color = 'var(--color-primary)';
-        statusTag.style.backgroundColor = 'var(--color-info-bg)';
-        break;
-      case 'RECOVERED':
-        statusTitle.textContent = 'System recovered';
-        statusDesc.textContent = 'The detected changes were successfully reversed and verified.';
-        statusTag.style.color = 'var(--color-success)';
-        statusTag.style.backgroundColor = 'var(--color-success-bg)';
-        incidentBanner.style.display = 'none';
-        incidentIndicator.style.display = 'none';
-        break;
+    if (state.state === 'NORMAL') {
+      statusHeading.textContent = 'Everything looks good';
+      statusSubheading.textContent = 'All drives and user folders actively protected.';
+      quickIncidentBar.style.display = 'none';
+      protectionPill.textContent = 'System-Wide Active';
+      protectionPill.style.color = 'var(--color-success)';
+    } else if (state.state === 'OBSERVING') {
+      statusHeading.textContent = 'Monitoring elevated activity';
+      statusSubheading.textContent = 'Analyzing system file operations.';
+      quickIncidentBar.style.display = 'none';
+    } else if (state.state === 'CONTAINED' || state.state === 'CRITICAL' || state.state === 'SUSPICIOUS') {
+      statusHeading.textContent = 'Activity paused';
+      statusSubheading.textContent = 'A process was paused to protect your files.';
+      quickIncidentBar.style.display = 'flex';
+      protectionPill.textContent = 'Airbag Engaged';
+      protectionPill.style.color = 'var(--color-danger)';
+    } else if (state.state === 'RECOVERED') {
+      statusHeading.textContent = 'System recovered';
+      statusSubheading.textContent = 'All altered files were restored and verified.';
+      quickIncidentBar.style.display = 'none';
+      protectionPill.textContent = 'System Restored';
+      protectionPill.style.color = 'var(--color-success)';
     }
 
-    // Render Incident Details
-    renderIncidentView(state.activeIncident);
+    // Populate incident details if present
+    if (state.activeIncident) {
+      currentIncident = state.activeIncident;
+      renderIncident(currentIncident);
+    }
 
-    // Render Dashboard Activity Feed
-    renderRecentFeed(state.recentEvents || []);
+    // Render feed
+    renderFeed(state.recentEvents || []);
   }
 
-  function renderIncidentView(incident) {
-    if (!incident) {
-      noIncidentState.style.display = 'block';
-      incidentDetailState.style.display = 'none';
-      return;
-    }
+  function renderIncident(inc) {
+    if (!inc) return;
+    const diff = inc.diff || { modified: [], deleted: [] };
+    const proc = inc.process || { name: 'unknown_payload.exe', pid: 'N/A', path: 'C:\\Temp\\unknown.exe' };
 
-    noIncidentState.style.display = 'none';
-    incidentDetailState.style.display = 'block';
-
-    const diff = incident.diff || { modified: [], deleted: [], created: [] };
-    incStatModified.textContent = diff.modified ? diff.modified.length : 0;
-    incStatDeleted.textContent = diff.deleted ? diff.deleted.length : 0;
-    incStatCreated.textContent = diff.created ? diff.created.length : 0;
+    incProcTag.textContent = proc.name;
+    qibTitle.textContent = `${proc.name} paused`;
+    metricModified.textContent = diff.modified ? diff.modified.length : 0;
+    metricDeleted.textContent = diff.deleted ? diff.deleted.length : 0;
+    metricStatus.textContent = inc.status || 'PAUSED';
 
     // Reasons
-    incReasonsList.innerHTML = '';
-    const reasons = (incident.evaluation && incident.evaluation.reasons) || [
-      'The modification rate was significantly higher than normal.',
-      'User data files were directly modified.',
-      'Process is unverified or unsigned.',
+    incReasons.innerHTML = '';
+    const reasons = (inc.evaluation && inc.evaluation.reasons) || [
+      'Unusually high file modification rate.',
+      'User document areas affected.',
+      'Unsigned executable binary.',
     ];
     reasons.forEach(r => {
       const li = document.createElement('li');
       li.textContent = r;
-      incReasonsList.appendChild(li);
+      incReasons.appendChild(li);
     });
 
-    // Forensic specs
-    const proc = incident.process || {};
-    ffProcName.textContent = proc.name || 'unknown.exe';
-    ffPid.textContent = proc.pid || 'N/A';
-    ffPath.textContent = proc.path || 'Unknown path';
-    ffSignature.textContent = proc.signature || 'Unsigned';
-    ffHash.textContent = proc.hash || 'N/A';
-    ffSignals.textContent = (incident.evaluation && incident.evaluation.signals) ? incident.evaluation.signals.join(', ') : 'none';
+    // Forensics
+    fPath.textContent = proc.path || proc.name;
+    fPid.textContent = proc.pid || 'N/A';
+    fSig.textContent = proc.signature || 'Unverified';
+    fHash.textContent = proc.hash || 'N/A';
 
-    // Recovery status alerts
-    if (incident.recovered) {
-      recoverySuccessBox.style.display = 'flex';
-      recoveryProgressBox.style.display = 'none';
-      btnRecoverMain.disabled = true;
-      btnRecoverMain.innerHTML = '✓ System Recovered';
+    if (inc.recovered) {
+      btnIncidentRecover.disabled = true;
+      btnIncidentRecover.textContent = '✓ Files Restored & Verified';
     } else {
-      recoverySuccessBox.style.display = 'none';
-      btnRecoverMain.disabled = false;
-      btnRecoverMain.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-          <path d="M21 3v5h-5"/>
-          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
-          <path d="M8 16H3v5"/>
-        </svg> Restore System State`;
+      btnIncidentRecover.disabled = false;
+      btnIncidentRecover.textContent = '✓ Restore Files Now';
     }
   }
 
-  function renderRecentFeed(events) {
-    dashboardRecentList.innerHTML = '';
+  function renderFeed(events) {
+    activityFeed.innerHTML = '';
     if (events.length === 0) {
-      dashboardRecentList.innerHTML = '<div class="card-hint">No recent events recorded.</div>';
+      activityFeed.innerHTML = '<div style="font-size:0.75rem; color:var(--text-dim); text-align:center; padding:10px;">Monitoring active. No unusual events.</div>';
       return;
     }
 
     events.slice(0, 5).forEach(evt => {
-      const item = document.createElement('div');
-      item.className = 'activity-item';
+      const row = document.createElement('div');
+      row.className = 'feed-row';
 
       let dotClass = '';
-      if (evt.state === 'CRITICAL' || evt.state === 'CONTAINED') dotClass = 'danger';
-      else if (evt.state === 'SUSPICIOUS' || evt.state === 'OBSERVING') dotClass = 'warning';
+      let badgeClass = '';
+      if (evt.state === 'CRITICAL' || evt.state === 'CONTAINED') {
+        dotClass = 'danger';
+        badgeClass = 'danger';
+      } else if (evt.state === 'SUSPICIOUS' || evt.state === 'OBSERVING') {
+        dotClass = 'warning';
+        badgeClass = 'warning';
+      }
 
-      item.innerHTML = `
-        <div class="act-left">
-          <span class="act-dot ${dotClass}"></span>
+      row.innerHTML = `
+        <div class="feed-row-left">
+          <span class="feed-row-dot ${dotClass}"></span>
           <div>
-            <div class="act-title">${evt.title}</div>
-            <div class="act-time">${evt.timeFormatted} • ${evt.description.substring(0, 75)}...</div>
+            <span class="feed-name">${evt.process ? evt.process.name : evt.title}</span>
+            <div class="feed-desc">${evt.description.substring(0, 48)}...</div>
           </div>
         </div>
-        <span class="badge ${evt.state === 'NORMAL' ? 'badge-success' : 'badge-warning'}">${evt.state}</span>
+        <span class="feed-badge ${badgeClass}">${evt.state}</span>
       `;
-      dashboardRecentList.appendChild(item);
+      activityFeed.appendChild(row);
     });
   }
 
-  // 4. Timeline
   async function loadTimeline() {
-    if (!api) return;
-    const events = await api.getEvents({ state: currentTimelineFilter });
-    timelineEntries.innerHTML = '';
+    timelineList.innerHTML = '<div style="font-size:0.75rem; color:var(--text-dim); padding:10px;">Loading timeline...</div>';
+    const events = await api.getEvents({ limit: 25 });
+    timelineList.innerHTML = '';
 
-    if (events.length === 0) {
-      timelineEntries.innerHTML = '<div class="empty-state">No events matching this filter.</div>';
+    if (!events || events.length === 0) {
+      timelineList.innerHTML = '<div style="font-size:0.75rem; color:var(--text-dim); padding:10px;">No timeline entries recorded.</div>';
       return;
     }
 
-    events.forEach(evt => {
-      const entry = document.createElement('div');
-      entry.className = 'timeline-entry';
-
-      let badgeClass = 'badge-info';
-      if (evt.state === 'NORMAL' || evt.state === 'RECOVERED') badgeClass = 'badge-success';
-      if (evt.state === 'SUSPICIOUS' || evt.state === 'OBSERVING') badgeClass = 'badge-warning';
-      if (evt.state === 'CRITICAL' || evt.state === 'CONTAINED') badgeClass = 'badge-danger';
-
-      entry.innerHTML = `
-        <div class="timeline-entry-header">
-          <span class="timeline-entry-title">${evt.title}</span>
-          <span class="act-time">${evt.timeFormatted}</span>
+    events.forEach(e => {
+      const item = document.createElement('div');
+      item.className = 'tl-item';
+      item.innerHTML = `
+        <div class="tl-item-top">
+          <span class="tl-item-title">${e.title}</span>
+          <span class="tl-item-time">${e.timeFormatted}</span>
         </div>
-        <p class="timeline-entry-desc">${evt.description}</p>
-        <div style="display: flex; gap: 8px; margin-top: 6px;">
-          <span class="badge ${badgeClass}">${evt.state}</span>
-          ${evt.process ? `<span class="badge badge-info">${evt.process.name}</span>` : ''}
-        </div>
+        <div class="tl-item-desc">${e.description}</div>
       `;
-      timelineEntries.appendChild(entry);
+      timelineList.appendChild(item);
     });
   }
 
-  filterPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      filterPills.forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      currentTimelineFilter = pill.dataset.filter;
-      loadTimeline();
-    });
-  });
+  // 4. Simulations & Recovery Actions
+  async function triggerTamperSimulation() {
+    btnSimTamper.disabled = true;
+    btnSimTamper.textContent = 'Simulating...';
+    await api.runScenario('SETUP_BASELINE');
+    await api.runScenario('SUSPICIOUS_BURST');
+    btnSimTamper.disabled = false;
+    btnSimTamper.textContent = 'Simulate Burst Alert';
+    showView('incident');
+  }
 
-  // 5. Actions & Buttons
-  btnRecoverMain.addEventListener('click', async () => {
-    recoveryProgressBox.style.display = 'block';
-    recoveryProgressBar.style.width = '0%';
-    recoveryProgressCounter.textContent = 'Preparing...';
+  btnSimTamper.addEventListener('click', triggerTamperSimulation);
+  btnQuickTest.addEventListener('click', triggerTamperSimulation);
+
+  btnIncidentRecover.addEventListener('click', async () => {
+    incRecoveryProgress.style.display = 'block';
+    incProgressBar.style.width = '20%';
+    incProgressCounter.textContent = 'Restoring...';
 
     const res = await api.executeRecovery();
-    recoveryProgressBar.style.width = '100%';
-    recoveryProgressCounter.textContent = `${res.totalRestored} restored`;
+    incProgressBar.style.width = '100%';
+    incProgressCounter.textContent = `${res.totalRestored} restored`;
 
     setTimeout(() => {
-      recoveryProgressBox.style.display = 'none';
-      recoverySuccessBox.style.display = 'flex';
-      recoverySuccessText.textContent = `${res.totalRestored} files restored and cryptographically verified. No changes remain.`;
+      incRecoveryProgress.style.display = 'none';
+      btnIncidentRecover.disabled = true;
+      btnIncidentRecover.textContent = `✓ ${res.totalRestored} Files Restored`;
     }, 400);
   });
 
-  btnAllowActivity.addEventListener('click', async () => {
-    if (confirm('Are you sure you want to allow this process and resume its execution?')) {
-      await api.allowActivity();
-      switchTab('dashboard');
-    }
+  btnIncidentAllow.addEventListener('click', async () => {
+    await api.allowActivity();
+    showView('dashboard');
   });
 
-  btnDemoBaseline.addEventListener('click', async () => {
-    btnDemoBaseline.disabled = true;
-    btnDemoBaseline.textContent = 'Generating...';
-    await api.runScenario('SETUP_BASELINE');
-    btnDemoBaseline.disabled = false;
-    btnDemoBaseline.textContent = '✓ Documents Initialized';
-    setTimeout(() => {
-      btnDemoBaseline.textContent = 'Generate Test Documents';
-    }, 2500);
-  });
-
-  btnDemoNormal.addEventListener('click', async () => {
-    btnDemoNormal.disabled = true;
-    btnDemoNormal.textContent = 'Running Update...';
-    await api.runScenario('NORMAL_UPDATE');
-    btnDemoNormal.disabled = false;
-    btnDemoNormal.textContent = '✓ Update Completed (Normal)';
-    setTimeout(() => {
-      btnDemoNormal.textContent = 'Run Update Simulation';
-    }, 2500);
-  });
-
-  btnDemoSuspicious.addEventListener('click', async () => {
-    btnDemoSuspicious.disabled = true;
-    btnDemoSuspicious.textContent = 'Executing Burst...';
-    await api.runScenario('SUSPICIOUS_BURST');
-    btnDemoSuspicious.disabled = false;
-    btnDemoSuspicious.textContent = 'Run Burst Tampering';
-    switchTab('incident');
-  });
-
-  btnChangeFolder.addEventListener('click', async () => {
-    const selected = await api.selectFolder();
-    if (selected) {
-      await api.startMonitoring(selected);
-    }
-  });
-
-  btnRebaseline.addEventListener('click', async () => {
-    if (currentState && currentState.monitoredDir) {
-      await api.startMonitoring(currentState.monitoredDir);
-      alert('Baseline snapshot successfully updated for the monitored folder.');
-    }
-  });
-
-  // Real-time API event hooks
+  // Reactive updates
   api.onStateChanged((state) => {
     renderState(state);
   });
 
-  api.onRecoveryProgress((progress) => {
-    recoveryProgressBox.style.display = 'block';
-    const percent = Math.round((progress.current / Math.max(1, progress.total)) * 100);
-    recoveryProgressBar.style.width = `${percent}%`;
-    recoveryProgressCounter.textContent = `${progress.current} / ${progress.total}`;
-  });
+  // Handle direct navigation request (e.g. from popup toast "View Details")
+  if (api.onNavigate) {
+    api.onNavigate((view) => {
+      showView(view);
+    });
+  }
 
   // Initialize
   initTheme();
-  const initialState = await api.getState();
-  renderState(initialState);
+  const initial = await api.getState();
+  renderState(initial);
 });

@@ -1,54 +1,157 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, screen, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
 const SecurityCoordinator = require('../engine/coordinator');
 
 let mainWindow = null;
+let popupWindow = null;
+let tray = null;
 let coordinator = null;
+let isQuitting = false;
 
-function createWindow() {
+const iconPath = path.join(__dirname, '../../assets/icon.png');
+
+function getTrayIcon() {
+  if (fs.existsSync(iconPath)) {
+    return nativeImage.createFromPath(iconPath);
+  }
+  // Fallback 16x16 empty image
+  return nativeImage.createEmpty();
+}
+
+function createMainWindow() {
   mainWindow = new BrowserWindow({
-    width: 1040,
-    height: 760,
-    minWidth: 880,
-    minHeight: 620,
-    title: 'Guardian — Local Behavioral Protection',
+    width: 440,
+    height: 620,
+    minWidth: 400,
+    minHeight: 520,
+    title: 'Guardian',
+    icon: getTrayIcon(),
+    show: true,
+    autoHideMenuBar: true,
+    backgroundColor: '#0b0f19',
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false,
     },
-    show: false,
-    autoHideMenuBar: true,
-    backgroundColor: '#0f172a',
-  });
-
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
-    mainWindow.focus();
-  });
-
-  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
-    console.error('Failed to load UI:', errorCode, errorDescription);
   });
 
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
 
-  // Initialize engine coordinator
-  const defaultDir = path.join(process.cwd(), 'test_environment');
-  coordinator = new SecurityCoordinator({ defaultTestDir: defaultDir });
-
-  coordinator.on('state-changed', (state) => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('state-changed', state);
+  // Minimize/Hide to tray instead of quitting on window close (Google Drive behavior)
+  mainWindow.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault();
+      mainWindow.hide();
     }
   });
 
-  // Start initial baseline monitoring
-  coordinator.startMonitoring(defaultDir).catch(err => {
-    console.error('Failed auto-starting initial monitoring:', err);
+  mainWindow.webContents.on('did-fail-load', (e, code, desc) => {
+    console.error('Failed to load main UI:', code, desc);
+  });
+}
+
+function showToastPopup(incident) {
+  if (popupWindow && !popupWindow.isDestroyed()) {
+    popupWindow.close();
+  }
+
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
+
+  const popupWidth = 380;
+  const popupHeight = 185;
+  const margin = 16;
+
+  // Position at bottom-right corner just above Windows taskbar (Avast style)
+  const x = Math.round(width - popupWidth - margin);
+  const y = Math.round(height - popupHeight - margin);
+
+  popupWindow = new BrowserWindow({
+    width: popupWidth,
+    height: popupHeight,
+    x,
+    y,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      preload: path.join(__dirname, '../preload/preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+
+  popupWindow.loadFile(path.join(__dirname, '../renderer/popup.html'));
+
+  popupWindow.once('ready-to-show', () => {
+    popupWindow.showInactive(); // Show without stealing active keyboard focus from user's current app
+  });
+}
+
+function setupTray() {
+  const icon = getTrayIcon();
+  tray = new Tray(icon);
+  tray.setToolTip('Guardian — System-Wide Protection Active');
+
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Guardian: System Protected', enabled: false },
+    { type: 'separator' },
+    {
+      label: 'Open Guardian Dashboard',
+      click: () => {
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.focus();
+        }
+      },
+    },
+    {
+      label: 'Simulate Burst Tampering (Test Pop-up)',
+      click: async () => {
+        if (coordinator) {
+          await coordinator.runScenario('SETUP_BASELINE');
+          await coordinator.runScenario('SUSPICIOUS_BURST');
+        }
+      },
+    },
+    {
+      label: 'Toggle Protection',
+      type: 'checkbox',
+      checked: true,
+      click: (item) => {
+        if (coordinator) {
+          if (item.checked) coordinator.startMonitoring();
+          else coordinator.stopMonitoring();
+        }
+      },
+    },
+    { type: 'separator' },
+    {
+      label: 'Quit Guardian',
+      click: () => {
+        isQuitting = true;
+        app.quit();
+      },
+    },
+  ]);
+
+  tray.setContextMenu(contextMenu);
+
+  // Left click toggles main window
+  tray.on('click', () => {
+    if (mainWindow.isVisible()) {
+      mainWindow.hide();
+    } else {
+      mainWindow.show();
+      mainWindow.focus();
+    }
   });
 }
 
@@ -87,26 +190,47 @@ ipcMain.handle('get-events', (event, filter) => {
   return coordinator.eventStore.getEvents(filter);
 });
 
-ipcMain.handle('select-folder', async () => {
-  const res = await dialog.showOpenDialog(mainWindow, {
-    properties: ['openDirectory', 'createDirectory'],
-  });
-  if (!res.canceled && res.filePaths.length > 0) {
-    return res.filePaths[0];
-  }
-  return null;
+ipcMain.handle('hide-window', () => {
+  if (mainWindow) mainWindow.hide();
 });
 
-app.whenReady().then(() => {
-  createWindow();
+ipcMain.handle('open-main-window', (event, viewName) => {
+  if (mainWindow) {
+    mainWindow.show();
+    mainWindow.focus();
+    if (viewName) {
+      mainWindow.webContents.send('navigate-view', viewName);
+    }
+  }
+});
 
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+app.whenReady().then(async () => {
+  createMainWindow();
+  setupTray();
+
+  // Initialize engine coordinator
+  coordinator = new SecurityCoordinator();
+
+  coordinator.on('state-changed', (state) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('state-changed', state);
+    }
   });
+
+  // When anomalous incident is detected:
+  // Show Avast-style toast popup in the corner, DO NOT open the full app!
+  coordinator.on('incident-detected', (incident) => {
+    showToastPopup(incident);
+  });
+
+  // Start system-wide monitoring across drives & user folders
+  await coordinator.startMonitoring();
+});
+
+app.on('before-quit', () => {
+  isQuitting = true;
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  // Stay running in the system tray
 });

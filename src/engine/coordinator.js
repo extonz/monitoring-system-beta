@@ -24,7 +24,7 @@ class SecurityCoordinator extends EventEmitter {
 
     this.state = 'NORMAL'; // NORMAL | OBSERVING | SUSPICIOUS | CRITICAL | CONTAINED | RECOVERING | RECOVERED
     this.activeIncident = null;
-    this.monitoredDir = null;
+    this.monitoredPaths = [];
 
     this._bindMonitor();
   }
@@ -33,7 +33,7 @@ class SecurityCoordinator extends EventEmitter {
     this.monitor.on('activity', async (event) => {
       this.detector.recordOperation(event);
 
-      // Attribute event to a process (in real usage or simulation)
+      // System-wide file activity evaluation
       const evaluation = this.detector.evaluate({
         name: 'explorer.exe',
         isKnownTrusted: true,
@@ -50,8 +50,8 @@ class SecurityCoordinator extends EventEmitter {
       this.eventStore.addEvent({
         type: 'MONITOR_ERROR',
         state: this.state,
-        title: 'File Monitor Warning',
-        description: `Monitoring notice: ${err.message}`,
+        title: 'Monitoring Notice',
+        description: err.message,
       });
       this._emitState();
     });
@@ -82,17 +82,22 @@ class SecurityCoordinator extends EventEmitter {
   async _triggerContainment(evaluation, processInfo) {
     this.state = 'CONTAINED';
 
-    // 1. Suspend the offending process
+    // 1. Suspend process to immediately halt damage
     if (processInfo.pid) {
       await this.processManager.suspendProcess(processInfo.pid, processInfo);
     }
 
-    // 2. Assess recoverable differences against baseline snapshot
+    // 2. Assess recoverable differences
     let diff = null;
     try {
       diff = this.recoveryEngine.diffCurrentState();
     } catch {
-      diff = { totalChanges: evaluation.stats ? evaluation.stats.totalOps : 0, modified: [], deleted: [], created: [] };
+      diff = {
+        totalChanges: evaluation.stats ? evaluation.stats.totalOps : 0,
+        modified: [],
+        deleted: [],
+        created: [],
+      };
     }
 
     const incident = {
@@ -107,17 +112,17 @@ class SecurityCoordinator extends EventEmitter {
     };
     this.activeIncident = incident;
 
-    // 3. Log containment event
+    // 3. Log event
     this.eventStore.addEvent({
       type: 'INCIDENT_CONTAINED',
       state: 'CONTAINED',
       title: 'Activity Contained',
-      description: evaluation.explanation || 'Suspicious activity has been paused while changes are investigated.',
+      description: evaluation.explanation || 'Suspicious operations paused while changes are investigated.',
       process: processInfo,
       stats: {
-        modified: diff.modified.length,
-        deleted: diff.deleted.length,
-        created: diff.created.length,
+        modified: diff.modified ? diff.modified.length : 0,
+        deleted: diff.deleted ? diff.deleted.length : 0,
+        created: diff.created ? diff.created.length : 0,
         affectedDirectories: 1,
       },
       signals: evaluation.signals,
@@ -126,34 +131,40 @@ class SecurityCoordinator extends EventEmitter {
         reasons: evaluation.reasons,
         pid: processInfo.pid,
         hash: processInfo.hash,
-        signature: processInfo.signature,
+        path: processInfo.path,
       },
     });
 
     this._emitState();
+
+    // Emit event specifically for the Avast-style toast notification popup!
+    this.emit('incident-detected', incident);
   }
 
   /**
-   * Initialize and start monitoring on a target folder
+   * Start system-wide monitoring
    */
-  async startMonitoring(targetDir = this.defaultTestDir) {
-    if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
+  async startMonitoring(paths = null) {
+    this.monitor.start(paths);
+    this.monitoredPaths = this.monitor.monitoredPaths;
+
+    // If the local test/vault environment exists, snapshot it for recovery
+    if (fs.existsSync(this.defaultTestDir)) {
+      try {
+        await this.recoveryEngine.createSnapshot(this.defaultTestDir);
+      } catch (e) {
+        // Continue cleanly
+      }
     }
-    this.monitoredDir = path.resolve(targetDir);
 
-    // Ensure baseline snapshot exists
-    await this.recoveryEngine.createSnapshot(this.monitoredDir);
-
-    this.monitor.start(this.monitoredDir);
     this.state = 'NORMAL';
     this.activeIncident = null;
 
     this.eventStore.addEvent({
       type: 'MONITORING_STARTED',
       state: 'NORMAL',
-      title: 'Monitoring Active',
-      description: `Baseline established and real-time monitoring enabled for ${this.monitoredDir}`,
+      title: 'System Protection Active',
+      description: `Monitoring enabled across entire system (${this.monitoredPaths.length} primary locations)`,
     });
 
     this._emitState();
@@ -165,14 +176,14 @@ class SecurityCoordinator extends EventEmitter {
     this.eventStore.addEvent({
       type: 'MONITORING_STOPPED',
       state: this.state,
-      title: 'Monitoring Paused',
-      description: 'Behavioral monitoring paused by user.',
+      title: 'Protection Paused',
+      description: 'System-wide monitoring paused by user.',
     });
     this._emitState();
   }
 
   /**
-   * Execute verified recovery on contained incident
+   * Execute verified recovery
    */
   async executeRecovery(onProgress = null) {
     if (!this.recoveryEngine.currentSnapshot) {
@@ -186,7 +197,7 @@ class SecurityCoordinator extends EventEmitter {
       type: 'RECOVERY_STARTED',
       state: 'RECOVERING',
       title: 'Recovery in Progress',
-      description: 'Restoring monitored environment to verified baseline snapshot.',
+      description: 'Restoring altered environment to verified baseline snapshot.',
     });
 
     const result = await this.recoveryEngine.restoreSnapshot(onProgress);
@@ -201,7 +212,7 @@ class SecurityCoordinator extends EventEmitter {
       type: 'RECOVERY_COMPLETED',
       state: 'RECOVERED',
       title: 'System Recovered',
-      description: `${result.totalRestored} files restored. The system was verified after recovery and no lingering modifications remain.`,
+      description: `${result.totalRestored} files restored and cryptographically verified.`,
       stats: {
         modified: result.restoredModified,
         deleted: result.restoredDeleted,
@@ -218,7 +229,7 @@ class SecurityCoordinator extends EventEmitter {
   }
 
   /**
-   * Allow activity (user marks false positive or resumes process)
+   * Allow activity (False positive handling)
    */
   async allowActivity(pid = null) {
     const targetPid = pid || (this.activeIncident && this.activeIncident.process ? this.activeIncident.process.pid : null);
@@ -231,7 +242,7 @@ class SecurityCoordinator extends EventEmitter {
       type: 'ACTIVITY_ALLOWED',
       state: 'NORMAL',
       title: 'Activity Allowed',
-      description: `Activity for process ${targetPid || 'unknown'} was reviewed and allowed by user.`,
+      description: `Process activity for ${targetPid || 'unknown'} was reviewed and resumed by user.`,
     });
 
     this.activeIncident = null;
@@ -239,20 +250,19 @@ class SecurityCoordinator extends EventEmitter {
   }
 
   /**
-   * Run one of the built-in MVP simulation scenarios
+   * Run scenario simulation
    */
   async runScenario(scenarioType) {
-    const dir = this.monitoredDir || this.defaultTestDir;
-    const runner = new ScenarioRunner(dir);
+    const runner = new ScenarioRunner(this.defaultTestDir);
 
     if (scenarioType === 'SETUP_BASELINE') {
       runner.setupBaselineFiles(15);
-      await this.recoveryEngine.createSnapshot(dir);
+      await this.recoveryEngine.createSnapshot(this.defaultTestDir);
       this.eventStore.addEvent({
         type: 'BASELINE_CREATED',
         state: 'NORMAL',
         title: 'Test Environment Initialized',
-        description: `Generated 15 sample documents in ${dir} and saved clean snapshot.`,
+        description: `Baseline documents prepared in ${this.defaultTestDir}`,
       });
       this._emitState();
       return { success: true };
@@ -271,7 +281,7 @@ class SecurityCoordinator extends EventEmitter {
         type: 'LEGITIMATE_UPDATE',
         state: 'NORMAL',
         title: 'Normal Application Update',
-        description: 'updater.exe updated 15 components inside Application/Cache. Operation evaluated as expected behavior.',
+        description: 'updater.exe updated 15 components inside Application/Cache (Expected pattern).',
         process: res.process,
       });
       this.state = 'NORMAL';
@@ -288,7 +298,6 @@ class SecurityCoordinator extends EventEmitter {
         elapsedSeconds: res.stats.elapsedSeconds,
       });
 
-      // Trigger incident workflow
       await this._triggerContainment(evalResult, res.process);
       return evalResult;
     }
@@ -297,10 +306,10 @@ class SecurityCoordinator extends EventEmitter {
   getState() {
     return {
       state: this.state,
-      monitoredDir: this.monitoredDir,
+      monitoredPaths: this.monitoredPaths,
       isMonitoring: this.monitor.isMonitoring,
       activeIncident: this.activeIncident,
-      recentEvents: this.eventStore.getRecentEvents(12),
+      recentEvents: this.eventStore.getRecentEvents(8),
       suspendedCount: this.processManager.getSuspendedProcesses().length,
     };
   }

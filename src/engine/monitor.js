@@ -2,37 +2,90 @@ const chokidar = require('chokidar');
 const EventEmitter = require('events');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 class FileMonitor extends EventEmitter {
   constructor() {
     super();
     this.watcher = null;
-    this.targetDir = null;
+    this.monitoredPaths = [];
     this.isMonitoring = false;
     this.totalEventsObserved = 0;
   }
 
   /**
-   * Start monitoring a designated target directory
-   * @param {string} dirPath
+   * Determine primary system directories to monitor system-wide
+   * Focuses on user storage, documents, desktop, downloads, and roots while filtering OS kernel churn.
    */
-  start(dirPath) {
+  getDefaultSystemPaths() {
+    const userProfile = process.env.USERPROFILE || os.homedir();
+    const candidatePaths = [
+      path.join(userProfile, 'Desktop'),
+      path.join(userProfile, 'Documents'),
+      path.join(userProfile, 'Downloads'),
+      path.join(userProfile, 'Pictures'),
+      path.join(userProfile, 'Videos'),
+      path.join(process.cwd(), 'test_environment'), // local workspace test area
+    ];
+
+    // Check if whole user directory or secondary drives exist
+    const activePaths = candidatePaths.filter(p => fs.existsSync(p));
+    if (activePaths.length === 0) {
+      activePaths.push(userProfile);
+    }
+    return activePaths;
+  }
+
+  /**
+   * Start system-wide monitoring across all primary system directories
+   * @param {string|string[]} [customPaths]
+   */
+  start(customPaths = null) {
     if (this.isMonitoring) {
       this.stop();
     }
 
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath, { recursive: true });
+    let pathsToWatch = [];
+    if (customPaths) {
+      pathsToWatch = Array.isArray(customPaths) ? customPaths : [customPaths];
+    } else {
+      pathsToWatch = this.getDefaultSystemPaths();
     }
 
-    this.targetDir = path.resolve(dirPath);
-    this.watcher = chokidar.watch(this.targetDir, {
-      ignored: /(^|[\/\\])\..|node_modules/, // ignore dotfiles and node_modules
+    // Ensure paths exist
+    pathsToWatch = pathsToWatch.map(p => path.resolve(p)).filter(p => {
+      try {
+        if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
+        return true;
+      } catch {
+        return false;
+      }
+    });
+
+    this.monitoredPaths = pathsToWatch;
+
+    // Intelligent ignore regex to prevent OS internal lockups while watching system-wide
+    const ignorePatterns = [
+      /(^|[\/\\])\../,                      // dotfiles (.git, .cache)
+      /node_modules/,                       // dependencies
+      /AppData[\\\/]Local[\\\/]Temp/,       // windows temp churn
+      /AppData[\\\/]Local[\\\/]Microsoft/,  // edge/windows telemetry
+      /\$Recycle\.Bin/,                     // recycle bin
+      /System Volume Information/,          // system restore
+      /pagefile\.sys/,
+      /hiberfil\.sys/,
+      /\.guardian_vault/,                   // guardian internal snapshot store
+      /\.guardian_data/,                    // guardian internal event logs
+    ];
+
+    this.watcher = chokidar.watch(this.monitoredPaths, {
+      ignored: ignorePatterns,
       persistent: true,
       ignoreInitial: true,
+      depth: 6, // deep monitoring across folder hierarchies
       awaitWriteFinish: {
-        stabilityThreshold: 100,
-        pollInterval: 50,
+        stabilityThreshold: 80,
+        pollInterval: 40,
       },
     });
 
@@ -43,7 +96,7 @@ class FileMonitor extends EventEmitter {
       .on('error', (err) => this.emit('error', err));
 
     this.isMonitoring = true;
-    this.emit('started', { targetDir: this.targetDir });
+    this.emit('started', { monitoredPaths: this.monitoredPaths });
   }
 
   _onEvent(type, filePath) {
@@ -51,7 +104,8 @@ class FileMonitor extends EventEmitter {
     const event = {
       type,
       path: filePath,
-      relative: path.relative(this.targetDir, filePath),
+      filename: path.basename(filePath),
+      dir: path.dirname(filePath),
       timestamp: Date.now(),
     };
     this.emit('activity', event);
@@ -69,8 +123,10 @@ class FileMonitor extends EventEmitter {
   getStatus() {
     return {
       isMonitoring: this.isMonitoring,
-      targetDir: this.targetDir,
+      systemWide: true,
+      monitoredPaths: this.monitoredPaths,
       totalEventsObserved: this.totalEventsObserved,
+      primaryLocation: this.monitoredPaths.length > 0 ? this.monitoredPaths[0] : 'System Wide',
     };
   }
 }

@@ -6,6 +6,8 @@ out/
 
 # Logs and runtime data
 *.log
+.guardian_data/
+.guardian_vault/
 recovery_store/
 test_environment/
 test_vault/

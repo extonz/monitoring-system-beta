@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guardian Alert</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="toast-card">
+    <div class="toast-header">
+      <div class="toast-brand">
+        <div class="shield-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <span class="toast-appname">GUARDIAN AIRBAG</span>
+      </div>
+      <button class="toast-close" id="btn-close" title="Dismiss">×</button>
+    </div>
+
+    <div class="toast-body">
+      <div class="toast-headline">
+        <span class="warning-icon">⚠</span>
+        <strong id="toast-title">Unusual activity detected</strong>
+      </div>
+      <p class="toast-message" id="toast-msg">
+        <span class="proc-name" id="toast-proc">unknown_payload.exe</span> modified files at an unusually high rate.
+      </p>
+      <div class="toast-subtext">The activity was paused while we investigate.</div>
+    </div>
+
+    <div class="toast-actions">
+      <button class="btn btn-details" id="btn-details">View Details</button>
+      <button class="btn btn-recover" id="btn-recover">Restore Files</button>
+      <button class="btn btn-allow" id="btn-allow">Allow</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
