@@ -355,6 +355,26 @@ class GuardianEngine extends EventEmitter {
     this.monitoredPaths = [];
   }
 
+  _isIgnoredPath(testPath) {
+    if (!testPath) return false;
+    const normalized = testPath.replace(/\\/g, '/');
+
+    // Ignore hidden files and dot-folders
+    if (/(^|\/)\.[^\/]/.test(normalized)) return true;
+
+    // Ignore dev and temp folders
+    if (/node_modules|AppData|\$Recycle\.Bin|System Volume Information|\.guardian_/i.test(normalized)) {
+      return true;
+    }
+
+    // Windows NTFS junction points / legacy localized system aliases that throw EPERM
+    if (/(^|\/)(Mi música|Mis imágenes|Mis vídeos|Mis plantillas|My Music|My Pictures|My Videos|Application Data|Cookies|Local Settings|NetHood|PrintHood|Recent|SendTo|Start Menu|Templates)($|\/)/i.test(normalized)) {
+      return true;
+    }
+
+    return false;
+  }
+
   _getSystemPaths() {
     const userProfile = process.env.USERPROFILE || os.homedir();
     const candidate = [
@@ -364,7 +384,15 @@ class GuardianEngine extends EventEmitter {
       path.join(userProfile, 'Pictures'),
       path.join(this.defaultTestDir),
     ];
-    return candidate.filter(p => fs.existsSync(p));
+    return candidate.filter(p => {
+      try {
+        if (!fs.existsSync(p)) return false;
+        fs.readdirSync(p);
+        return true;
+      } catch {
+        return false;
+      }
+    });
   }
 
   async startMonitoring(customPaths = null) {
@@ -375,25 +403,27 @@ class GuardianEngine extends EventEmitter {
       try { await this.vault.createSnapshot(this.defaultTestDir); } catch {}
     }
 
-    const ignorePatterns = [
-      /(^|[\/\\])\../,
-      /node_modules/,
-      /AppData[\\\/]Local[\\\/]Temp/,
-      /\$Recycle\.Bin/,
-      /System Volume Information/,
-      /\.guardian_/,
-    ];
+    try {
+      this.watcher = chokidar.watch(this.monitoredPaths, {
+        ignored: (p) => this._isIgnoredPath(p),
+        persistent: true,
+        ignoreInitial: true,
+        followSymlinks: false,
+        depth: 4,
+      });
 
-    this.watcher = chokidar.watch(this.monitoredPaths, {
-      ignored: ignorePatterns,
-      persistent: true,
-      ignoreInitial: true,
-      depth: 5,
-    });
+      this.watcher.on('all', (event, filePath) => {
+        this.scorer.recordOperation({ type: event, path: filePath });
+      });
 
-    this.watcher.on('all', (event, filePath) => {
-      this.scorer.recordOperation({ type: event, path: filePath });
-    });
+      // Gracefully absorb OS permission restrictions (EPERM, EACCES)
+      this.watcher.on('error', (err) => {
+        if (err && (err.code === 'EPERM' || err.code === 'EACCES')) return;
+        console.warn('Guardian monitor notice:', err && err.message);
+      });
+    } catch (err) {
+      console.warn('Guardian monitor startup notice:', err && err.message);
+    }
 
     this.isMonitoring = true;
     this.state = 'NORMAL';
@@ -412,7 +442,9 @@ class GuardianEngine extends EventEmitter {
 
   stopMonitoring() {
     if (this.watcher) {
-      this.watcher.close();
+      try {
+        this.watcher.close();
+      } catch {}
       this.watcher = null;
     }
     this.isMonitoring = false;
