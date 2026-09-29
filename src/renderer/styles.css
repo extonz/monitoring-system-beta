@@ -1,65 +1,61 @@
 /* =========================================================
-   Guardian — macOS System Settings Design Language
-   Built strictly according to DOCS/DESIGN.md & UI-UX Pro Max.
+   Guardian — Custom Precision Desktop Security Utility
+   Minimal, restrained, high-craftsmanship UI.
    ========================================================= */
 
 :root {
-  --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --ease-apple: cubic-bezier(0.2, 0, 0, 1);
-  --duration-anim: 140ms;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --anim-dur: 150ms;
 
-  /* macOS Dark Mode System Palette */
-  --bg-sidebar: #1e1e20;
-  --bg-content: #161618;
-  --bg-grouped: #232326;
-  --bg-grouped-hover: #2a2a2d;
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --divider-row: rgba(255, 255, 255, 0.05);
+  /* Dark Theme Palette (Deep Obsidian Slate) */
+  --bg-app: #111215;
+  --bg-topbar: #16181d;
+  --bg-nav: #14151a;
+  --bg-surface: #1b1d23;
+  --bg-surface-hover: #22252c;
+  --border: rgba(255, 255, 255, 0.08);
+  --divider: rgba(255, 255, 255, 0.05);
 
-  --text-primary: #ffffff;
-  --text-secondary: #8e8e93;
-  --text-tertiary: #636366;
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --text-dim: #6b7280;
 
-  --apple-blue: #0a84ff;
-  --apple-blue-hover: #0071e3;
-  --apple-green: #30d158;
-  --apple-orange: #ff9f0a;
-  --apple-red: #ff453a;
+  --accent-primary: #0284c7;
+  --accent-primary-hover: #0369a1;
+  --accent-green: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
 
-  --sidebar-active: rgba(255, 255, 255, 0.1);
-  --sidebar-hover: rgba(255, 255, 255, 0.05);
-
-  --badge-green-bg: rgba(48, 209, 88, 0.15);
-  --badge-amber-bg: rgba(255, 159, 10, 0.15);
-  --badge-red-bg: rgba(255, 69, 58, 0.15);
+  --tag-green-bg: rgba(16, 185, 129, 0.15);
+  --tag-amber-bg: rgba(245, 158, 11, 0.15);
+  --tag-red-bg: rgba(239, 68, 68, 0.15);
 }
 
 [data-theme="light"] {
-  /* macOS Light Mode System Palette */
-  --bg-sidebar: #f0f0f3;
-  --bg-content: #ffffff;
-  --bg-grouped: #f6f6f8;
-  --bg-grouped-hover: #efeff2;
-  --border-subtle: rgba(0, 0, 0, 0.08);
-  --divider-row: rgba(0, 0, 0, 0.05);
+  /* Light Theme Palette (Crisp High-Contrast Neutral) */
+  --bg-app: #f4f5f8;
+  --bg-topbar: #ffffff;
+  --bg-nav: #eceef2;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f9fafb;
+  --border: rgba(0, 0, 0, 0.08);
+  --divider: rgba(0, 0, 0, 0.05);
 
-  --text-primary: #1d1d1f;
-  --text-secondary: #6e6e73;
-  --text-tertiary: #86868b;
+  --text-main: #111827;
+  --text-muted: #4b5563;
+  --text-dim: #9ca3af;
 
-  --apple-blue: #0071e3;
-  --apple-blue-hover: #0077ed;
-  --apple-green: #34c759;
-  --apple-orange: #ff9500;
-  --apple-red: #ff3b30;
+  --accent-primary: #0284c7;
+  --accent-primary-hover: #0369a1;
+  --accent-green: #059669;
+  --accent-amber: #d97706;
+  --accent-red: #dc2626;
 
-  --sidebar-active: rgba(0, 0, 0, 0.08);
-  --sidebar-hover: rgba(0, 0, 0, 0.04);
-
-  --badge-green-bg: rgba(52, 199, 89, 0.12);
-  --badge-amber-bg: rgba(255, 149, 0, 0.12);
-  --badge-red-bg: rgba(255, 59, 48, 0.1);
+  --tag-green-bg: rgba(5, 150, 105, 0.12);
+  --tag-amber-bg: rgba(217, 119, 6, 0.12);
+  --tag-red-bg: rgba(220, 38, 38, 0.1);
 }
 
 * {
@@ -69,9 +65,9 @@
 }
 
 body {
-  font-family: var(--font-system);
-  background: transparent;
-  color: var(--text-primary);
+  font-family: var(--font-sans);
+  background-color: transparent;
+  color: var(--text-main);
   line-height: 1.45;
   user-select: none;
   overflow: hidden;
@@ -80,7 +76,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--apple-blue);
+  outline: 2px solid var(--accent-primary);
   outline-offset: 1px;
 }
 
@@ -91,98 +87,155 @@ body {
   }
 }
 
-/* ================= Window Layout ================= */
-.settings-window {
+/* ================= Window Frame ================= */
+.app-shell {
   display: flex;
+  flex-direction: column;
   height: 100vh;
-  background: var(--bg-content);
-  border: 1px solid var(--border-subtle);
-  border-radius: 10px;
+  background: var(--bg-app);
+  border: 1px solid var(--border);
+  border-radius: 8px;
   overflow: hidden;
 }
 
-/* ================= Sidebar ================= */
-.settings-sidebar {
-  width: 200px;
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border-subtle);
-  display: flex;
-  flex-direction: column;
-  padding: 12px 10px;
-  flex-shrink: 0;
-  -webkit-app-region: drag;
-}
-
-.sidebar-header {
-  padding: 4px 6px 14px;
-}
-
-.traffic-lights {
-  display: flex;
-  gap: 7px;
-  -webkit-app-region: no-drag;
-}
-
-.traffic-light {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: opacity var(--duration-anim) ease;
-}
-
-.traffic-light.close { background: #ff5f56; }
-.traffic-light.minimize { background: #ffbd2e; }
-.traffic-light.zoom { background: #27c93f; }
-.traffic-light:hover { opacity: 0.8; }
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  -webkit-app-region: no-drag;
-}
-
-.nav-item {
+/* ================= Unified Topbar ================= */
+.app-topbar {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 6px 10px;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg-topbar);
+  border-bottom: 1px solid var(--border);
+  -webkit-app-region: drag;
+  height: 38px;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-shield {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--accent-primary);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.brand-scope-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent-green);
+  background: var(--tag-green-bg);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.topbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  -webkit-app-region: no-drag;
+}
+
+.topbar-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  width: 28px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--anim-dur) ease, color var(--anim-dur) ease;
+}
+
+.topbar-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-main);
+}
+
+.topbar-btn.window-ctrl.close:hover {
+  background: var(--accent-red);
+  color: #ffffff;
+}
+
+/* ================= Body Workspace ================= */
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ================= Left Navigation Rail ================= */
+.app-nav {
+  width: 175px;
+  background: var(--bg-nav);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 10px 8px;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
   border-radius: 6px;
   background: transparent;
   border: none;
-  color: var(--text-primary);
+  color: var(--text-muted);
   font-family: inherit;
-  font-size: 13px;
-  font-weight: 400;
-  cursor: pointer;
-  transition: background var(--duration-anim) var(--ease-apple);
-  position: relative;
-  text-align: left;
-  width: 100%;
-}
-
-.nav-item:hover {
-  background: var(--sidebar-hover);
-}
-
-.nav-item.active {
-  background: var(--sidebar-active);
+  font-size: 12.5px;
   font-weight: 500;
+  cursor: pointer;
+  transition: background var(--anim-dur) var(--ease), color var(--anim-dur) var(--ease);
+  width: 100%;
+  text-align: left;
+}
+
+.nav-button:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-main);
+}
+
+.nav-button.active {
+  background: var(--bg-surface);
+  color: var(--text-main);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.nav-button.active .nav-icon {
+  color: var(--accent-primary);
 }
 
 .nav-icon {
-  color: var(--apple-blue);
+  color: var(--text-dim);
   flex-shrink: 0;
 }
 
-.nav-label {
+.nav-text {
   flex: 1;
 }
 
-.nav-badge {
-  background: var(--apple-red);
+.nav-counter {
+  background: var(--accent-red);
   color: #ffffff;
   font-size: 10px;
   font-weight: 700;
@@ -190,49 +243,21 @@ body {
   border-radius: 10px;
 }
 
-.sidebar-footer {
-  padding-top: 8px;
-  border-top: 1px solid var(--border-subtle);
-  -webkit-app-region: no-drag;
-}
-
-.sidebar-theme-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  font-family: inherit;
-  font-size: 11.5px;
-  padding: 6px 8px;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-  transition: background var(--duration-anim) ease, color var(--duration-anim) ease;
-}
-
-.sidebar-theme-toggle:hover {
-  background: var(--sidebar-hover);
-  color: var(--text-primary);
-}
-
-/* ================= Detail Pane Canvas ================= */
-.settings-content {
+/* ================= Main Content Canvas ================= */
+.app-content {
   flex: 1;
   overflow-y: auto;
-  padding: 24px 28px;
-  background: var(--bg-content);
+  padding: 20px 24px;
 }
 
-.settings-pane {
+.content-pane {
   display: none;
   max-width: 580px;
 }
 
-.settings-pane.active {
+.content-pane.active {
   display: block;
-  animation: paneIn var(--duration-anim) var(--ease-apple);
+  animation: paneIn var(--anim-dur) var(--ease);
 }
 
 @keyframes paneIn {
@@ -240,320 +265,310 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ================= Pane Header ================= */
-.pane-header {
+/* ================= Content Header ================= */
+.content-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 
-.pane-title {
-  font-size: 19px;
-  font-weight: 600;
+.pane-headline {
+  font-size: 17px;
+  font-weight: 700;
   letter-spacing: -0.015em;
-  color: var(--text-primary);
+  color: var(--text-main);
   margin-bottom: 2px;
 }
 
-.pane-subtitle {
-  font-size: 12.5px;
-  color: var(--text-secondary);
-  line-height: 1.4;
+.pane-subline {
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
-.header-status-indicator {
+.status-chip {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: var(--bg-grouped);
-  border: 1px solid var(--border-subtle);
-  padding: 4px 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  padding: 3px 10px;
   border-radius: 14px;
 }
 
-.status-dot-native {
+.chip-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
+  background: var(--accent-green);
 }
 
-.status-dot-native.green { background: var(--apple-green); }
-.status-dot-native.amber { background: var(--apple-orange); }
-.status-dot-native.red { background: var(--apple-red); }
+.chip-dot.amber { background: var(--accent-amber); }
+.chip-dot.red { background: var(--accent-red); }
 
-.status-text-native {
+.chip-text {
   font-size: 11.5px;
-  font-weight: 500;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--text-main);
 }
 
-/* ================= Grouped Tables (macOS Settings style) ================= */
-.settings-group {
-  margin-bottom: 22px;
+/* ================= Surface Boxes & Rows ================= */
+.surface-group {
+  margin-bottom: 18px;
 }
 
-.group-title {
+.group-label {
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--text-dim);
   margin-bottom: 6px;
-  padding: 0 4px;
+  padding: 0 2px;
   display: block;
 }
 
-.group-title-row {
+.group-label-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
-  padding: 0 4px;
+  padding: 0 2px;
 }
 
-.mac-action-link {
+.action-link {
   background: transparent;
   border: none;
-  color: var(--apple-blue);
+  color: var(--accent-primary);
   font-size: 11.5px;
   font-weight: 500;
   cursor: pointer;
 }
+.action-link:hover { text-decoration: underline; }
 
-.mac-action-link:hover {
-  text-decoration: underline;
-}
-
-.grouped-rows {
-  background: var(--bg-grouped);
-  border: 1px solid var(--border-subtle);
+.surface-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
 }
 
-.grouped-rows.scrollable {
-  max-height: 320px;
+.surface-box.scrollable {
+  max-height: 300px;
   overflow-y: auto;
 }
 
-.grouped-rows.text-content {
-  padding: 12px 16px;
+.surface-box.text-padded {
+  padding: 12px 14px;
 }
 
-.row {
+.surface-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  font-size: 13px;
-  border-bottom: 1px solid var(--divider-row);
-  min-height: 42px;
+  padding: 9px 12px;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--divider);
+  min-height: 40px;
 }
 
-.row:last-child {
+.surface-row:last-child {
   border-bottom: none;
 }
 
-.row-label-group {
+.row-info {
   display: flex;
   flex-direction: column;
-  gap: 1px;
 }
 
-.row-title {
-  color: var(--text-primary);
-  font-weight: 400;
-}
-
-.row-desc {
-  font-size: 11.5px;
-  color: var(--text-secondary);
-}
-
-.row-value {
-  color: var(--text-primary);
+.row-main {
+  color: var(--text-main);
   font-weight: 500;
-  font-size: 12.5px;
 }
 
-.row-value-muted {
-  color: var(--text-secondary);
-  font-size: 12.5px;
+.row-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
 }
 
-.row-mono {
-  font-family: var(--font-mono);
+.row-val {
+  color: var(--text-main);
+  font-weight: 600;
   font-size: 12px;
-  color: var(--text-primary);
 }
 
-.row-pill {
+.row-aux {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.row-code {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-main);
+}
+
+.status-tag {
   font-size: 11px;
   font-weight: 600;
   padding: 2px 7px;
   border-radius: 4px;
 }
 
-.row-pill.green {
-  background: var(--badge-green-bg);
-  color: var(--apple-green);
-}
+.status-tag.green { background: var(--tag-green-bg); color: var(--accent-green); }
+.status-tag.amber { background: var(--tag-amber-bg); color: var(--accent-amber); }
+.status-tag.red { background: var(--tag-red-bg); color: var(--accent-red); }
 
-.row-pill.amber {
-  background: var(--badge-amber-bg);
-  color: var(--apple-orange);
-}
-
-.row-pill.red {
-  background: var(--badge-red-bg);
-  color: var(--apple-red);
-}
-
-/* ================= macOS Switch Toggle ================= */
-.mac-switch {
+/* ================= Modern Toggle Switch ================= */
+.modern-toggle {
   position: relative;
   display: inline-block;
-  width: 36px;
-  height: 20px;
+  width: 34px;
+  height: 18px;
   cursor: pointer;
 }
 
-.mac-switch input {
+.modern-toggle input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.switch-knob {
+.toggle-slider {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(120, 120, 128, 0.32);
-  transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1);
-  border-radius: 20px;
+  background-color: rgba(120, 120, 128, 0.3);
+  transition: background-color 0.18s ease;
+  border-radius: 18px;
 }
 
-.switch-knob:before {
+.toggle-slider:before {
   position: absolute;
   content: "";
-  height: 16px;
-  width: 16px;
+  height: 14px;
+  width: 14px;
   left: 2px;
   bottom: 2px;
   background-color: #ffffff;
-  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+  transition: transform 0.18s ease;
   border-radius: 50%;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-input:checked + .switch-knob {
-  background-color: var(--apple-green);
+input:checked + .toggle-slider {
+  background-color: var(--accent-green);
 }
 
-input:checked + .switch-knob:before {
+input:checked + .toggle-slider:before {
   transform: translateX(16px);
 }
 
 /* ================= Buttons ================= */
-.mac-button {
+.btn {
   font-family: inherit;
   font-size: 12px;
-  font-weight: 500;
-  padding: 4px 12px;
-  border-radius: 5px;
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-content);
-  color: var(--text-primary);
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
   cursor: pointer;
-  transition: background var(--duration-anim) var(--ease-apple), border-color var(--duration-anim) var(--ease-apple);
+  transition: all var(--anim-dur) ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
-.mac-button:hover {
-  background: var(--bg-grouped-hover);
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 11.5px;
 }
 
-.mac-button.primary {
-  background: var(--apple-blue);
+.btn-primary {
+  background: var(--accent-primary);
   color: #ffffff;
-  border-color: var(--apple-blue);
+  border-color: var(--accent-primary);
 }
+.btn-primary:hover { background: var(--accent-primary-hover); }
 
-.mac-button.primary:hover {
-  background: var(--apple-blue-hover);
-  border-color: var(--apple-blue-hover);
+.btn-secondary {
+  background: var(--bg-surface-hover);
+  color: var(--text-main);
 }
+.btn-secondary:hover { background: var(--border); }
 
-.mac-button.secondary {
-  background: var(--bg-grouped);
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border-color: transparent;
 }
+.btn-ghost:hover { color: var(--text-main); }
 
 /* ================= Empty State ================= */
-.empty-state-card {
+.empty-state-box {
   text-align: center;
-  padding: 48px 24px;
-  background: var(--bg-grouped);
-  border: 1px solid var(--border-subtle);
+  padding: 40px 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
 }
 
-.empty-icon {
-  color: var(--apple-green);
-  margin-bottom: 12px;
+.empty-glyph {
+  color: var(--accent-green);
+  margin-bottom: 10px;
 }
 
-.empty-title {
-  font-size: 14px;
+.empty-heading {
+  font-size: 13.5px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-main);
   margin-bottom: 4px;
 }
 
-.empty-desc {
-  font-size: 12px;
-  color: var(--text-secondary);
+.empty-caption {
+  font-size: 11.5px;
+  color: var(--text-muted);
   max-width: 360px;
   margin: 0 auto;
-  line-height: 1.45;
+  line-height: 1.4;
 }
 
-/* ================= Incident Actions ================= */
-.incident-actions-bar {
-  display: flex;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.incident-actions-bar .mac-button {
-  flex: 1;
-  padding: 7px 12px;
-}
-
-.mac-list {
-  padding-left: 14px;
-  font-size: 12px;
-  color: var(--text-secondary);
+/* ================= Incident Layout ================= */
+.signal-list {
+  padding-left: 16px;
+  font-size: 11.5px;
+  color: var(--text-muted);
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.recovery-progress-card {
-  background: var(--bg-grouped);
-  border: 1px solid var(--border-subtle);
+.incident-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.incident-actions .btn {
+  flex: 1;
+}
+
+.recovery-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 8px 12px;
   margin-top: 12px;
 }
 
-.progress-labels {
+.recovery-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 11.5px;
-  color: var(--text-secondary);
+  font-size: 11px;
+  color: var(--text-muted);
   margin-bottom: 6px;
 }
 
-.progress-track {
+.recovery-track {
   width: 100%;
   height: 4px;
   background: rgba(120, 120, 128, 0.2);
@@ -561,20 +576,30 @@ input:checked + .switch-knob:before {
   overflow: hidden;
 }
 
-.progress-fill {
+.recovery-fill {
   height: 100%;
-  background: var(--apple-blue);
+  background: var(--accent-primary);
   transition: width 0.1s linear;
 }
 
-.mac-details {
-  font-size: 12px;
-  color: var(--text-secondary);
+.forensic-details {
+  font-size: 11.5px;
+  color: var(--text-muted);
 }
 
-.mac-details summary {
+.forensic-details summary {
   cursor: pointer;
   outline: none;
-  color: var(--apple-blue);
+  color: var(--accent-primary);
   font-weight: 500;
+}
+
+/* ================= Footer ================= */
+.app-footer {
+  padding: 6px 14px;
+  background: var(--bg-topbar);
+  border-top: 1px solid var(--border);
+  font-size: 10.5px;
+  color: var(--text-dim);
+  text-align: center;
 }

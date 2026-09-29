@@ -7,296 +7,331 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="settings-window" role="application">
+  <div class="app-shell" role="application">
 
-    <!-- macOS Sidebar -->
-    <aside class="settings-sidebar">
-      <div class="sidebar-header">
-        <div class="traffic-lights" aria-hidden="true">
-          <span class="traffic-light close" id="btn-traffic-close"></span>
-          <span class="traffic-light minimize" id="btn-traffic-min"></span>
-          <span class="traffic-light zoom"></span>
-        </div>
-      </div>
-
-      <nav class="sidebar-nav" role="tablist">
-        <button class="nav-item active" data-tab="protection" role="tab" aria-selected="true" aria-controls="pane-protection">
-          <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <!-- Custom Unified Header / Drag Region -->
+    <header class="app-topbar">
+      <div class="topbar-brand">
+        <div class="brand-shield" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
-          <span class="nav-label">Protection</span>
-        </button>
+        </div>
+        <span class="brand-title">Guardian</span>
+        <span class="brand-scope-badge" id="brand-scope">All Volumes Active</span>
+      </div>
 
-        <button class="nav-item" data-tab="incidents" id="nav-incidents" role="tab" aria-selected="false" aria-controls="pane-incidents">
-          <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-            <line x1="12" y1="9" x2="12" y2="13"/>
-            <line x1="12" y1="17" x2="12.01" y2="17"/>
+      <div class="topbar-controls">
+        <!-- Quick Diagnostic Button -->
+        <button id="btn-quick-test" class="topbar-btn" title="Verify Protection Response" aria-label="Verify Protection Response">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
           </svg>
-          <span class="nav-label">Quarantine</span>
-          <span class="nav-badge" id="incident-count-badge" style="display: none;">1</span>
         </button>
 
-        <button class="nav-item" data-tab="activity" role="tab" aria-selected="false" aria-controls="pane-activity">
-          <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-          </svg>
-          <span class="nav-label">Activity Log</span>
-        </button>
-
-        <button class="nav-item" data-tab="preferences" role="tab" aria-selected="false" aria-controls="pane-preferences">
-          <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-          <span class="nav-label">Settings</span>
-        </button>
-      </nav>
-
-      <div class="sidebar-footer">
-        <button id="theme-toggle" class="sidebar-theme-toggle" aria-label="Toggle theme appearance">
+        <!-- Theme Toggle -->
+        <button id="theme-toggle" class="topbar-btn" title="Toggle Theme" aria-label="Toggle Theme">
           <svg id="theme-icon-sun" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
             <line x1="4.22" y1="4.22" x2="19.78" y2="19.78"></line>
             <line x1="1" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="19.78" y2="4.22"></line>
           </svg>
           <svg id="theme-icon-moon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;" aria-hidden="true">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
-          <span class="theme-text" id="theme-label">Dark Mode</span>
+        </button>
+
+        <!-- Standard Right-Aligned Window Controls (Minimize & Close to Tray) -->
+        <button id="btn-window-min" class="topbar-btn window-ctrl" title="Minimize to Tray" aria-label="Minimize to Tray">
+          <svg width="10" height="2" viewBox="0 0 10 2" fill="currentColor">
+            <rect width="10" height="2" rx="1"/>
+          </svg>
+        </button>
+
+        <button id="btn-window-close" class="topbar-btn window-ctrl close" title="Hide to Tray" aria-label="Hide to Tray">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       </div>
-    </aside>
+    </header>
 
-    <!-- macOS Detail Canvas -->
-    <main class="settings-content">
+    <!-- Main Workspace -->
+    <div class="app-body">
 
-      <!-- ================= 1. TAB: PROTECTION ================= -->
-      <section id="pane-protection" class="settings-pane active" role="tabpanel">
-        <header class="pane-header">
-          <div class="header-text">
-            <h1 class="pane-title">Protection</h1>
-            <p class="pane-subtitle" id="status-subheading">Behavioral monitoring active across all drives and volumes.</p>
-          </div>
-          <div class="header-status-indicator" id="hero-indicator">
-            <span class="status-dot-native green" id="status-dot"></span>
-            <span class="status-text-native" id="status-heading">Protected</span>
-          </div>
-        </header>
-
-        <!-- Group: System Overview -->
-        <div class="settings-group">
-          <div class="group-title">SYSTEM STATUS</div>
-          <div class="grouped-rows">
-            <div class="row">
-              <div class="row-label-group">
-                <span class="row-title">Behavioral Monitoring</span>
-                <span class="row-desc">Evaluates process file operations in real time</span>
-              </div>
-              <label class="mac-switch" aria-label="Toggle behavioral monitoring">
-                <input type="checkbox" id="toggle-protection" checked>
-                <span class="switch-knob"></span>
-              </label>
-            </div>
-
-            <div class="row">
-              <div class="row-label-group">
-                <span class="row-title">Protected Scope</span>
-                <span class="row-desc" id="scope-display">All Local Drives & User Volumes</span>
-              </div>
-              <span class="row-pill green" id="protection-pill">Active</span>
-            </div>
-
-            <div class="row">
-              <div class="row-label-group">
-                <span class="row-title">Automatic Containment</span>
-                <span class="row-desc">Temporarily pauses processes exceeding safe rates</span>
-              </div>
-              <span class="row-value-muted">Enabled</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Group: Recent Background Processes -->
-        <div class="settings-group">
-          <div class="group-title-row">
-            <span class="group-title">RECENT ACTIVITY</span>
-            <button class="mac-action-link" id="btn-goto-activity">View All →</button>
-          </div>
-          <div class="grouped-rows" id="activity-feed">
-            <!-- Dynamically populated process rows -->
-          </div>
-        </div>
-
-        <!-- Group: Verification -->
-        <div class="settings-group">
-          <div class="group-title">DIAGNOSTICS</div>
-          <div class="grouped-rows">
-            <div class="row">
-              <div class="row-label-group">
-                <span class="row-title">System Defense Verification</span>
-                <span class="row-desc">Validates real-time detection, suspension, and rollback</span>
-              </div>
-              <button class="mac-button" id="btn-verify-defense">Run Check</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ================= 2. TAB: QUARANTINE / INCIDENTS ================= -->
-      <section id="pane-incidents" class="settings-pane" role="tabpanel">
-        <header class="pane-header">
-          <div class="header-text">
-            <h1 class="pane-title">Quarantine & Containment</h1>
-            <p class="pane-subtitle">Processes paused due to abnormal file modification patterns.</p>
-          </div>
-        </header>
-
-        <div id="no-incidents-view" class="empty-state-card">
-          <svg class="empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <!-- Navigation Rail -->
+      <nav class="app-nav" role="tablist">
+        <button class="nav-button active" data-tab="protection" role="tab" aria-selected="true" aria-controls="pane-protection">
+          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            <polyline points="9 12 11 14 15 10"/>
           </svg>
-          <div class="empty-title">No Threats Detected</div>
-          <div class="empty-desc">Your computer is running normally. If any background process exhibits suspicious burst tampering, Guardian will pause it and list it here.</div>
-        </div>
+          <span class="nav-text">Protection</span>
+        </button>
 
-        <div id="active-incident-view" style="display: none;">
-          <div class="settings-group">
-            <div class="group-title">SUSPENDED PROCESS</div>
-            <div class="grouped-rows">
-              <div class="row">
-                <span class="row-title">Executable</span>
-                <span class="row-mono" id="inc-proc-tag">unknown_payload.exe</span>
+        <button class="nav-button" data-tab="incidents" id="nav-incidents" role="tab" aria-selected="false" aria-controls="pane-incidents">
+          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span class="nav-text">Quarantine</span>
+          <span class="nav-counter" id="incident-count-badge" style="display: none;">1</span>
+        </button>
+
+        <button class="nav-button" data-tab="activity" role="tab" aria-selected="false" aria-controls="pane-activity">
+          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span class="nav-text">Activity</span>
+        </button>
+
+        <button class="nav-button" data-tab="preferences" role="tab" aria-selected="false" aria-controls="pane-preferences">
+          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span class="nav-text">Preferences</span>
+        </button>
+      </nav>
+
+      <!-- Content Viewport -->
+      <main class="app-content">
+
+        <!-- ================= 1. TAB: PROTECTION ================= -->
+        <section id="pane-protection" class="content-pane active" role="tabpanel">
+          <header class="content-header">
+            <div>
+              <h1 class="pane-headline">Protection Overview</h1>
+              <p class="pane-subline" id="status-subheading">Continuous behavioral defense across all local storage.</p>
+            </div>
+            <div class="status-chip" id="hero-chip">
+              <span class="chip-dot active" id="status-dot"></span>
+              <span class="chip-text" id="status-heading">Active</span>
+            </div>
+          </header>
+
+          <!-- Group: System Status -->
+          <div class="surface-group">
+            <div class="group-label">DEFENSE MODULES</div>
+            <div class="surface-box">
+              <div class="surface-row">
+                <div class="row-info">
+                  <span class="row-main">Behavioral File Monitoring</span>
+                  <span class="row-sub">Analyzes modification rates & heuristics in real time</span>
+                </div>
+                <label class="modern-toggle" aria-label="Toggle behavioral monitoring">
+                  <input type="checkbox" id="toggle-protection" checked>
+                  <span class="toggle-slider"></span>
+                </label>
               </div>
-              <div class="row">
-                <span class="row-title">Modifications Held</span>
-                <span class="row-value" id="metric-modified">0 files</span>
+
+              <div class="surface-row">
+                <div class="row-info">
+                  <span class="row-main">Protected Volumes</span>
+                  <span class="row-sub" id="scope-display">All Local Drives & User Files</span>
+                </div>
+                <span class="status-tag green" id="protection-pill">Active</span>
               </div>
-              <div class="row">
-                <span class="row-title">Deletions Held</span>
-                <span class="row-value" id="metric-deleted">0 files</span>
-              </div>
-              <div class="row">
-                <span class="row-title">Process State</span>
-                <span class="row-pill amber" id="metric-status">Suspended</span>
+
+              <div class="surface-row">
+                <div class="row-info">
+                  <span class="row-main">Process Containment Guard</span>
+                  <span class="row-sub">Suspends processes executing anomalous bursts</span>
+                </div>
+                <span class="row-aux">Enabled</span>
               </div>
             </div>
           </div>
 
-          <div class="settings-group">
-            <div class="group-title">DETECTION RATIONALE</div>
-            <div class="grouped-rows text-content">
-              <ul class="mac-list" id="inc-reasons">
-                <li>Modification rate was unusually high.</li>
-                <li>User data files were targeted.</li>
-                <li>Executable is unverified.</li>
-              </ul>
+          <!-- Group: Recent Background Processes -->
+          <div class="surface-group">
+            <div class="group-label-row">
+              <span class="group-label">RECENT SYSTEM ACTIVITY</span>
+              <button class="action-link" id="btn-goto-activity">History →</button>
+            </div>
+            <div class="surface-box" id="activity-feed">
+              <!-- Dynamically populated process rows -->
             </div>
           </div>
 
-          <!-- Recovery Progress Bar -->
-          <div id="inc-recovery-progress" class="recovery-progress-card" style="display: none;">
-            <div class="progress-labels">
-              <span>Restoring previous clean state...</span>
-              <span id="inc-progress-counter">0 / 0</span>
-            </div>
-            <div class="progress-track">
-              <div class="progress-fill" id="inc-progress-bar" style="width: 0%;"></div>
+          <!-- Group: Verification -->
+          <div class="surface-group">
+            <div class="group-label">DIAGNOSTICS</div>
+            <div class="surface-box">
+              <div class="surface-row">
+                <div class="row-info">
+                  <span class="row-main">Verify Defense Response</span>
+                  <span class="row-sub">Tests anomaly detection, thread suspension, and file recovery</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btn-verify-defense">Run Check</button>
+              </div>
             </div>
           </div>
+        </section>
 
-          <div class="incident-actions-bar">
-            <button class="mac-button primary" id="btn-incident-recover">Restore Files</button>
-            <button class="mac-button secondary" id="btn-incident-allow">Allow Process</button>
+        <!-- ================= 2. TAB: QUARANTINE ================= -->
+        <section id="pane-incidents" class="content-pane" role="tabpanel">
+          <header class="content-header">
+            <div>
+              <h1 class="pane-headline">Quarantine & Containment</h1>
+              <p class="pane-subline">Suspended processes and protected file states.</p>
+            </div>
+          </header>
+
+          <div id="no-incidents-view" class="empty-state-box">
+            <div class="empty-glyph" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9 12 11 14 15 10"/>
+              </svg>
+            </div>
+            <div class="empty-heading">No Contained Threats</div>
+            <div class="empty-caption">All running processes are behaving within normal operating thresholds. If an anomalous process is contained, it will appear here for review.</div>
           </div>
 
-          <!-- Forensics -->
-          <div class="settings-group" style="margin-top: 20px;">
-            <details class="mac-details">
+          <div id="active-incident-view" style="display: none;">
+            <div class="surface-group">
+              <div class="group-label">SUSPENDED PROCESS</div>
+              <div class="surface-box">
+                <div class="surface-row">
+                  <span class="row-main">Process Binary</span>
+                  <span class="row-code" id="inc-proc-tag">unknown_payload.exe</span>
+                </div>
+                <div class="surface-row">
+                  <span class="row-main">Modifications Held</span>
+                  <span class="row-val" id="metric-modified">0 files</span>
+                </div>
+                <div class="surface-row">
+                  <span class="row-main">Deletions Held</span>
+                  <span class="row-val" id="metric-deleted">0 files</span>
+                </div>
+                <div class="surface-row">
+                  <span class="row-main">Process State</span>
+                  <span class="status-tag amber" id="metric-status">Suspended</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="surface-group">
+              <div class="group-label">DETECTION SIGNALS</div>
+              <div class="surface-box text-padded">
+                <ul class="signal-list" id="inc-reasons">
+                  <li>Modification rate exceeded standard operating baseline.</li>
+                  <li>Targeted user document directories.</li>
+                  <li>Binary is unverified.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Recovery Progress -->
+            <div id="inc-recovery-progress" class="recovery-box" style="display: none;">
+              <div class="recovery-labels">
+                <span>Restoring verified file states...</span>
+                <span id="inc-progress-counter">0 / 0</span>
+              </div>
+              <div class="recovery-track">
+                <div class="recovery-fill" id="inc-progress-bar" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="incident-actions">
+              <button class="btn btn-primary" id="btn-incident-recover">Restore Files</button>
+              <button class="btn btn-ghost" id="btn-incident-allow">Allow & Resume</button>
+            </div>
+
+            <!-- Technical Forensics -->
+            <details class="forensic-details">
               <summary>Technical Details</summary>
-              <div class="grouped-rows" style="margin-top: 8px;">
-                <div class="row">
-                  <span class="row-title">Binary Path</span>
-                  <span class="row-mono" id="f-path">C:\...</span>
+              <div class="surface-box" style="margin-top: 8px;">
+                <div class="surface-row">
+                  <span class="row-main">Path</span>
+                  <span class="row-code" id="f-path">C:\...</span>
                 </div>
-                <div class="row">
-                  <span class="row-title">Process ID (PID)</span>
-                  <span class="row-mono" id="f-pid">9942</span>
+                <div class="surface-row">
+                  <span class="row-main">Process ID (PID)</span>
+                  <span class="row-code" id="f-pid">9942</span>
                 </div>
-                <div class="row">
-                  <span class="row-title">Signature Status</span>
-                  <span class="row-value" id="f-sig">Unverified</span>
+                <div class="surface-row">
+                  <span class="row-main">Signature</span>
+                  <span class="row-val" id="f-sig">Unverified</span>
                 </div>
-                <div class="row">
-                  <span class="row-title">SHA-256</span>
-                  <span class="row-mono" id="f-hash">e3b0c442...</span>
+                <div class="surface-row">
+                  <span class="row-main">SHA-256</span>
+                  <span class="row-code" id="f-hash">e3b0c442...</span>
                 </div>
               </div>
             </details>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- ================= 3. TAB: ACTIVITY LOG ================= -->
-      <section id="pane-activity" class="settings-pane" role="tabpanel">
-        <header class="pane-header">
-          <div class="header-text">
-            <h1 class="pane-title">Activity Log</h1>
-            <p class="pane-subtitle">Chronological record of system observations and security events.</p>
+        <!-- ================= 3. TAB: ACTIVITY LOG ================= -->
+        <section id="pane-activity" class="content-pane" role="tabpanel">
+          <header class="content-header">
+            <div>
+              <h1 class="pane-headline">Event Activity Log</h1>
+              <p class="pane-subline">Chronological timeline of system events and defense decisions.</p>
+            </div>
+          </header>
+
+          <div class="surface-group">
+            <div class="surface-box scrollable" id="timeline-list">
+              <!-- Dynamically populated -->
+            </div>
           </div>
-        </header>
+        </section>
 
-        <div class="settings-group">
-          <div class="grouped-rows scrollable" id="timeline-list">
-            <!-- Populated dynamically -->
-          </div>
-        </div>
-      </section>
+        <!-- ================= 4. TAB: PREFERENCES ================= -->
+        <section id="pane-preferences" class="content-pane" role="tabpanel">
+          <header class="content-header">
+            <div>
+              <h1 class="pane-headline">System Preferences</h1>
+              <p class="pane-subline">Configure local storage and background monitoring behavior.</p>
+            </div>
+          </header>
 
-      <!-- ================= 4. TAB: PREFERENCES ================= -->
-      <section id="pane-preferences" class="settings-pane" role="tabpanel">
-        <header class="pane-header">
-          <div class="header-text">
-            <h1 class="pane-title">Settings</h1>
-            <p class="pane-subtitle">System privacy, snapshots, and background defense behavior.</p>
-          </div>
-        </header>
-
-        <div class="settings-group">
-          <div class="group-title">PRIVACY & STORAGE</div>
-          <div class="grouped-rows">
-            <div class="row">
-              <div class="row-label-group">
-                <span class="row-title">100% Local Execution</span>
-                <span class="row-desc">All file monitoring, detection heuristics, and snapshots are stored locally on this machine. No data leaves your computer.</span>
+          <div class="surface-group">
+            <div class="group-label">LOCAL EXECUTION & PRIVACY</div>
+            <div class="surface-box">
+              <div class="surface-row">
+                <div class="row-info">
+                  <span class="row-main">Zero External Telemetry</span>
+                  <span class="row-sub">Behavioral scoring and recovery snapshots are performed entirely on this device.</span>
+                </div>
+                <span class="status-tag green">Enforced</span>
               </div>
-              <span class="row-pill green">Enforced</span>
-            </div>
-            <div class="row">
-              <div class="row-label-group">
-                <span class="row-title">Run in Background</span>
-                <span class="row-desc">Keep Guardian active in the system tray when window is closed</span>
+              <div class="surface-row">
+                <div class="row-info">
+                  <span class="row-main">Background Tray Operation</span>
+                  <span class="row-sub">Runs unobtrusively in the taskbar when this window is closed</span>
+                </div>
+                <span class="row-aux">Active</span>
               </div>
-              <span class="row-value-muted">Active</span>
             </div>
           </div>
-        </div>
 
-        <div class="settings-group">
-          <div class="group-title">ABOUT</div>
-          <div class="grouped-rows">
-            <div class="row">
-              <span class="row-title">Guardian Desktop Utility</span>
-              <span class="row-value-muted">Version 0.1.0</span>
+          <div class="surface-group">
+            <div class="group-label">APPLICATION INFO</div>
+            <div class="surface-box">
+              <div class="surface-row">
+                <span class="row-main">Guardian Desktop Defense</span>
+                <span class="row-aux">v0.1.0</span>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-    </main>
+      </main>
+    </div>
+
+    <!-- Status Footer -->
+    <footer class="app-footer">
+      <span>Guardian Local Defense • 100% On-Device Processing</span>
+    </footer>
   </div>
 
   <script src="app.js"></script>

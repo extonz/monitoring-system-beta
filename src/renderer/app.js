@@ -1,22 +1,20 @@
-// Guardian — macOS System Settings Architecture Renderer Logic
+// Guardian — Custom Precision Desktop Security Renderer Logic
 
 document.addEventListener('DOMContentLoaded', async () => {
   const api = window.guardianAPI;
 
-  // Sidebar Tabs & Panes
-  const navItems = document.querySelectorAll('.nav-item');
-  const panes = document.querySelectorAll('.settings-pane');
-  const incidentBadge = document.getElementById('incident-count-badge');
-
-  // Traffic lights
-  const btnClose = document.getElementById('btn-traffic-close');
-  const btnMin = document.getElementById('btn-traffic-min');
-
-  // Theme
+  // Window Controls
+  const btnWindowClose = document.getElementById('btn-window-close');
+  const btnWindowMin = document.getElementById('btn-window-min');
+  const btnQuickTest = document.getElementById('btn-quick-test');
   const themeToggle = document.getElementById('theme-toggle');
   const themeIconSun = document.getElementById('theme-icon-sun');
   const themeIconMoon = document.getElementById('theme-icon-moon');
-  const themeLabel = document.getElementById('theme-label');
+
+  // Navigation
+  const navButtons = document.querySelectorAll('.nav-button');
+  const panes = document.querySelectorAll('.content-pane');
+  const incidentBadge = document.getElementById('incident-count-badge');
 
   // Protection Pane Elements
   const statusHeading = document.getElementById('status-heading');
@@ -29,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnGotoActivity = document.getElementById('btn-goto-activity');
   const btnVerifyDefense = document.getElementById('btn-verify-defense');
 
-  // Incidents Pane Elements
+  // Quarantine Pane Elements
   const noIncidentsView = document.getElementById('no-incidents-view');
   const activeIncidentView = document.getElementById('active-incident-view');
   const incProcTag = document.getElementById('inc-proc-tag');
@@ -52,10 +50,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 1. Navigation
   function switchTab(tabName) {
-    navItems.forEach(item => {
-      const match = item.dataset.tab === tabName;
-      item.classList.toggle('active', match);
-      item.setAttribute('aria-selected', match ? 'true' : 'false');
+    navButtons.forEach(btn => {
+      const match = btn.dataset.tab === tabName;
+      btn.classList.toggle('active', match);
+      btn.setAttribute('aria-selected', match ? 'true' : 'false');
     });
 
     panes.forEach(pane => {
@@ -67,22 +65,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  navItems.forEach(btn => {
+  navButtons.forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
 
   if (btnGotoActivity) btnGotoActivity.addEventListener('click', () => switchTab('activity'));
 
-  // Traffic lights
-  if (btnClose) {
-    btnClose.addEventListener('click', () => {
+  // Window Controls (Hide/Minimize to Tray)
+  if (btnWindowClose) {
+    btnWindowClose.addEventListener('click', () => {
       if (api && api.hideWindow) api.hideWindow();
       else window.close();
     });
   }
 
-  if (btnMin) {
-    btnMin.addEventListener('click', () => {
+  if (btnWindowMin) {
+    btnWindowMin.addEventListener('click', () => {
       if (api && api.hideWindow) api.hideWindow();
     });
   }
@@ -91,18 +89,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   function initTheme() {
     const saved = localStorage.getItem('guardian-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', saved);
-    updateTheme(saved);
+    updateThemeIcons(saved);
   }
 
-  function updateTheme(theme) {
+  function updateThemeIcons(theme) {
     if (theme === 'dark') {
       themeIconSun.style.display = 'block';
       themeIconMoon.style.display = 'none';
-      if (themeLabel) themeLabel.textContent = 'Dark Mode';
     } else {
       themeIconSun.style.display = 'none';
       themeIconMoon.style.display = 'block';
-      if (themeLabel) themeLabel.textContent = 'Light Mode';
     }
   }
 
@@ -112,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const next = cur === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', next);
       localStorage.setItem('guardian-theme', next);
-      updateTheme(next);
+      updateThemeIcons(next);
     });
   }
 
@@ -125,26 +121,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (state.state === 'NORMAL') {
-      statusHeading.textContent = 'Protected';
-      statusSubheading.textContent = 'Behavioral monitoring active across all drives and volumes.';
-      statusDot.className = 'status-dot-native green';
+      statusHeading.textContent = 'Active';
+      statusSubheading.textContent = 'Continuous behavioral defense across all local storage.';
+      statusDot.className = 'chip-dot';
       protectionPill.textContent = 'Active';
-      protectionPill.className = 'row-pill green';
+      protectionPill.className = 'status-tag green';
       if (incidentBadge) incidentBadge.style.display = 'none';
       noIncidentsView.style.display = 'block';
       activeIncidentView.style.display = 'none';
     } else if (state.state === 'OBSERVING') {
       statusHeading.textContent = 'Observing';
       statusSubheading.textContent = 'Elevated background file operations detected.';
-      statusDot.className = 'status-dot-native amber';
+      statusDot.className = 'chip-dot amber';
       protectionPill.textContent = 'Analyzing';
-      protectionPill.className = 'row-pill amber';
+      protectionPill.className = 'status-tag amber';
     } else if (state.state === 'CONTAINED' || state.state === 'CRITICAL' || state.state === 'SUSPICIOUS') {
-      statusHeading.textContent = 'Threat Contained';
+      statusHeading.textContent = 'Intervened';
       statusSubheading.textContent = 'A process was paused to preserve file integrity.';
-      statusDot.className = 'status-dot-native amber';
-      protectionPill.textContent = 'Intervened';
-      protectionPill.className = 'row-pill amber';
+      statusDot.className = 'chip-dot amber';
+      protectionPill.textContent = 'Threat Contained';
+      protectionPill.className = 'status-tag red';
       if (incidentBadge) {
         incidentBadge.style.display = 'inline-block';
         incidentBadge.textContent = '1';
@@ -154,9 +150,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else if (state.state === 'RECOVERED') {
       statusHeading.textContent = 'Restored';
       statusSubheading.textContent = 'All changed files were verified and recovered.';
-      statusDot.className = 'status-dot-native green';
+      statusDot.className = 'chip-dot';
       protectionPill.textContent = 'Clean';
-      protectionPill.className = 'row-pill green';
+      protectionPill.className = 'status-tag green';
       if (incidentBadge) incidentBadge.style.display = 'none';
       noIncidentsView.style.display = 'block';
       activeIncidentView.style.display = 'none';
@@ -182,8 +178,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     incReasons.innerHTML = '';
     const reasons = (inc.evaluation && inc.evaluation.reasons) || [
       'Modification rate was unusually high.',
-      'User data files were targeted.',
-      'Executable is unverified.',
+      'Protected user document storage was targeted.',
+      'Binary signature is unverified.',
     ];
     reasons.forEach(r => {
       const li = document.createElement('li');
@@ -208,54 +204,54 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderFeed(events) {
     activityFeed.innerHTML = '';
     if (!events || events.length === 0) {
-      activityFeed.innerHTML = '<div class="row"><span class="row-desc">No events recorded.</span></div>';
+      activityFeed.innerHTML = '<div class="surface-row"><span class="row-sub">No recent events recorded.</span></div>';
       return;
     }
 
     events.slice(0, 3).forEach(evt => {
       const row = document.createElement('div');
-      row.className = 'row';
+      row.className = 'surface-row';
 
       const isAlert = evt.state === 'CRITICAL' || evt.state === 'CONTAINED' || evt.state === 'SUSPICIOUS';
 
       row.innerHTML = `
-        <div class="row-label-group">
-          <span class="row-title">${evt.process ? evt.process.name : evt.title}</span>
-          <span class="row-desc">${evt.description ? evt.description.substring(0, 50) : ''}</span>
+        <div class="row-info">
+          <span class="row-main">${evt.process ? evt.process.name : evt.title}</span>
+          <span class="row-sub">${evt.description ? evt.description.substring(0, 48) : ''}</span>
         </div>
-        <span class="row-pill ${isAlert ? 'amber' : 'green'}">${evt.state}</span>
+        <span class="status-tag ${isAlert ? 'amber' : 'green'}">${evt.state}</span>
       `;
       activityFeed.appendChild(row);
     });
   }
 
   async function loadTimeline() {
-    timelineList.innerHTML = '<div class="row"><span class="row-desc">Loading log...</span></div>';
+    timelineList.innerHTML = '<div class="surface-row"><span class="row-sub">Loading activity log...</span></div>';
     const events = await api.getEvents({ limit: 25 });
     timelineList.innerHTML = '';
 
     if (!events || events.length === 0) {
-      timelineList.innerHTML = '<div class="row"><span class="row-desc">No log entries recorded.</span></div>';
+      timelineList.innerHTML = '<div class="surface-row"><span class="row-sub">No log entries recorded.</span></div>';
       return;
     }
 
     events.forEach(e => {
       const row = document.createElement('div');
-      row.className = 'row';
+      row.className = 'surface-row';
       row.innerHTML = `
-        <div class="row-label-group">
-          <span class="row-title">${e.title}</span>
-          <span class="row-desc">${e.description}</span>
+        <div class="row-info">
+          <span class="row-main">${e.title}</span>
+          <span class="row-sub">${e.description}</span>
         </div>
-        <span class="row-value-muted">${e.timeFormatted}</span>
+        <span class="row-aux">${e.timeFormatted}</span>
       `;
       timelineList.appendChild(row);
     });
   }
 
-  // 4. Verification Check
-  if (btnVerifyDefense) {
-    btnVerifyDefense.addEventListener('click', async () => {
+  // Diagnostic Defense Verification
+  async function triggerVerification() {
+    if (btnVerifyDefense) {
       btnVerifyDefense.disabled = true;
       btnVerifyDefense.textContent = 'Checking...';
       await api.runScenario('SETUP_BASELINE');
@@ -263,10 +259,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       btnVerifyDefense.disabled = false;
       btnVerifyDefense.textContent = 'Run Check';
       switchTab('incidents');
-    });
+    }
   }
 
-  // 5. Recovery & Allow Handlers
+  if (btnVerifyDefense) btnVerifyDefense.addEventListener('click', triggerVerification);
+  if (btnQuickTest) btnQuickTest.addEventListener('click', triggerVerification);
+
+  // Recovery & Allow Handlers
   if (btnIncidentRecover) {
     btnIncidentRecover.addEventListener('click', async () => {
       incRecoveryProgress.style.display = 'block';
@@ -299,7 +298,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Reactive listeners
   api.onStateChanged((state) => renderState(state));
 
   if (api.onNavigate) {
