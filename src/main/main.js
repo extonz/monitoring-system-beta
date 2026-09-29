@@ -101,10 +101,10 @@ function setupTray() {
   tray.setToolTip('Guardian — System-Wide Protection Active');
 
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'Guardian: System Protected', enabled: false },
+    { label: 'Guardian: Protected', enabled: false },
     { type: 'separator' },
     {
-      label: 'Open Guardian Dashboard',
+      label: 'Open Guardian',
       click: () => {
         if (mainWindow) {
           mainWindow.show();
@@ -113,7 +113,7 @@ function setupTray() {
       },
     },
     {
-      label: 'Simulate Burst Tampering (Test Pop-up)',
+      label: 'Verify Protection Response',
       click: async () => {
         if (coordinator) {
           await coordinator.runScenario('SETUP_BASELINE');
@@ -122,7 +122,7 @@ function setupTray() {
       },
     },
     {
-      label: 'Toggle Protection',
+      label: 'Real-time Defense',
       type: 'checkbox',
       checked: true,
       click: (item) => {

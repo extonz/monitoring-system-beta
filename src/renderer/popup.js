@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         toastProc.textContent = inc.process.name;
       }
       if (inc.diff && inc.diff.totalChanges) {
-        toastMsg.innerHTML = `<span class="proc-name">${inc.process ? inc.process.name : 'A process'}</span> modified or deleted ${inc.diff.totalChanges} files in rapid succession.`;
+        toastMsg.innerHTML = `<span class="mac-toast-proc">${inc.process ? inc.process.name : 'A background process'}</span> was paused after attempting rapid modifications to ${inc.diff.totalChanges} files.`;
       }
     }
   } catch (err) {
@@ -38,11 +38,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnRecover.disabled = true;
     try {
       const res = await api.executeRecovery();
-      btnRecover.textContent = `✓ ${res.totalRestored} Restored`;
+      btnRecover.textContent = `${res.totalRestored} Files Restored`;
       setTimeout(() => {
         window.close();
-      }, 1400);
-    } catch (e) {
+      }, 1200);
+    } catch {
       btnRecover.textContent = 'Error';
     }
   });

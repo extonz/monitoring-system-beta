@@ -1,4 +1,4 @@
-// Guardian — Apple macOS Style Renderer Logic
+// Guardian — Apple Human Interface System Renderer Logic
 
 document.addEventListener('DOMContentLoaded', async () => {
   const api = window.guardianAPI;
@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Recent Activity Feed
   const activityFeed = document.getElementById('activity-feed');
   const btnShowTimeline = document.getElementById('btn-show-timeline');
-  const btnSimTamper = document.getElementById('btn-sim-tamper');
 
   // Incident View
   const btnBackToDash = document.getElementById('btn-back-to-dash');
@@ -110,38 +109,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!state) return;
 
     if (state.monitoredPaths && state.monitoredPaths.length > 0) {
-      scopeDisplay.textContent = 'All Drives & User Folders';
+      scopeDisplay.textContent = 'All Local Drives & User Files';
     }
 
     if (state.state === 'NORMAL') {
-      statusHeading.textContent = 'Your Computer is Protected';
-      statusSubheading.textContent = 'Continuous behavioral monitoring is active.';
+      statusHeading.textContent = 'Your System is Protected';
+      statusSubheading.textContent = 'Continuous behavioral monitoring active across all drives.';
       protectionLabel.textContent = 'Active';
-      protectionLabel.className = 'mac-row-value-green';
-      statusGlyphWrap.className = 'mac-status-badge';
-      statusSvg.innerHTML = '<path d="M20 6L9 17l-5-5"/>';
+      protectionLabel.className = 'mac-cell-pill green';
+      statusGlyphWrap.className = 'mac-status-icon-wrap';
+      statusSvg.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
       quickIncidentBar.style.display = 'none';
     } else if (state.state === 'OBSERVING') {
       statusHeading.textContent = 'Monitoring Activity';
-      statusSubheading.textContent = 'Observing file operation patterns.';
+      statusSubheading.textContent = 'Observing background file operations.';
       protectionLabel.textContent = 'Observing';
-      protectionLabel.className = 'mac-row-value-amber';
+      protectionLabel.className = 'mac-cell-pill amber';
       quickIncidentBar.style.display = 'none';
     } else if (state.state === 'CONTAINED' || state.state === 'CRITICAL' || state.state === 'SUSPICIOUS') {
-      statusHeading.textContent = 'Suspicious Activity Paused';
+      statusHeading.textContent = 'Suspicious Activity Contained';
       statusSubheading.textContent = 'A process was paused to preserve file integrity.';
       protectionLabel.textContent = 'Intervened';
-      protectionLabel.className = 'mac-row-value-amber';
-      statusGlyphWrap.className = 'mac-status-badge alert';
-      statusSvg.innerHTML = '<line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+      protectionLabel.className = 'mac-cell-pill amber';
+      statusGlyphWrap.className = 'mac-status-icon-wrap alert';
+      statusSvg.innerHTML = '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>';
       quickIncidentBar.style.display = 'flex';
     } else if (state.state === 'RECOVERED') {
       statusHeading.textContent = 'System Restored';
-      statusSubheading.textContent = 'All changed files were verified and recovered.';
+      statusSubheading.textContent = 'All files verified and restored to clean state.';
       protectionLabel.textContent = 'Restored';
-      protectionLabel.className = 'mac-row-value-green';
-      statusGlyphWrap.className = 'mac-status-badge';
-      statusSvg.innerHTML = '<path d="M20 6L9 17l-5-5"/>';
+      protectionLabel.className = 'mac-cell-pill green';
+      statusGlyphWrap.className = 'mac-status-icon-wrap';
+      statusSvg.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
       quickIncidentBar.style.display = 'none';
     }
 
@@ -155,19 +154,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderIncident(inc) {
     if (!inc) return;
     const diff = inc.diff || { modified: [], deleted: [] };
-    const proc = inc.process || { name: 'unknown_payload.exe', pid: 'N/A', path: 'C:\\Temp\\unknown.exe' };
+    const proc = inc.process || { name: 'unknown_payload.exe', pid: 'N/A', path: 'C:\\ProgramData\\unknown.exe' };
 
     incProcTag.textContent = proc.name;
     qibTitle.textContent = `${proc.name} paused`;
     metricModified.textContent = diff.modified ? diff.modified.length : 0;
     metricDeleted.textContent = diff.deleted ? diff.deleted.length : 0;
-    metricStatus.textContent = inc.status || 'Paused';
+    metricStatus.textContent = inc.status || 'Suspended';
 
     incReasons.innerHTML = '';
     const reasons = (inc.evaluation && inc.evaluation.reasons) || [
-      'Modification rate significantly higher than baseline.',
-      'User document directories were targeted.',
-      'Executable binary is unverified.',
+      'Modification rate significantly exceeds normal baseline.',
+      'Protected user document storage was targeted.',
+      'Unverified publisher binary.',
     ];
     reasons.forEach(r => {
       const li = document.createElement('li');
@@ -185,7 +184,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       btnIncidentRecover.textContent = 'Files Successfully Restored';
     } else {
       btnIncidentRecover.disabled = false;
-      btnIncidentRecover.textContent = 'Restore Previous Files';
+      btnIncidentRecover.textContent = 'Restore Affected Files';
     }
   }
 
@@ -198,13 +197,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     events.slice(0, 4).forEach(evt => {
       const row = document.createElement('div');
-      row.className = 'mac-feed-item';
+      row.className = 'mac-feed-row';
+      row.setAttribute('role', 'listitem');
 
       const isAlert = evt.state === 'CRITICAL' || evt.state === 'CONTAINED' || evt.state === 'SUSPICIOUS';
 
       row.innerHTML = `
         <div class="mac-feed-left">
-          <span class="mac-dot ${isAlert ? 'alert' : ''}"></span>
+          <span class="mac-dot ${isAlert ? 'alert' : ''}" aria-hidden="true"></span>
           <span class="mac-feed-name">${evt.process ? evt.process.name : evt.title}</span>
         </div>
         <span class="mac-feed-time">${evt.timeFormatted}</span>
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function loadTimeline() {
-    timelineList.innerHTML = '<div style="font-size:11px; color:var(--text-tertiary); padding:10px;">Loading timeline...</div>';
+    timelineList.innerHTML = '<div style="font-size:11px; color:var(--text-tertiary); padding:10px;">Loading log...</div>';
     const events = await api.getEvents({ limit: 20 });
     timelineList.innerHTML = '';
 
@@ -225,35 +225,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     events.forEach(e => {
       const item = document.createElement('div');
-      item.className = 'mac-tl-item';
+      item.className = 'mac-timeline-item';
+      item.setAttribute('role', 'article');
       item.innerHTML = `
-        <div class="mac-tl-top">
-          <span class="mac-tl-title">${e.title}</span>
-          <span class="mac-tl-time">${e.timeFormatted}</span>
+        <div class="mac-timeline-row">
+          <span class="mac-timeline-heading">${e.title}</span>
+          <span class="mac-timeline-timestamp">${e.timeFormatted}</span>
         </div>
-        <div class="mac-tl-desc">${e.description}</div>
+        <div class="mac-timeline-narrative">${e.description}</div>
       `;
       timelineList.appendChild(item);
     });
   }
 
-  // Simulation & Actions
-  async function triggerSimulation() {
-    btnSimTamper.disabled = true;
-    btnSimTamper.textContent = 'Simulating...';
+  // Diagnostic Defense Verification
+  async function triggerVerification() {
+    btnQuickTest.disabled = true;
     await api.runScenario('SETUP_BASELINE');
     await api.runScenario('SUSPICIOUS_BURST');
-    btnSimTamper.disabled = false;
-    btnSimTamper.textContent = 'Test Behavioral Airbag';
+    btnQuickTest.disabled = false;
     showView('incident');
   }
 
-  btnSimTamper.addEventListener('click', triggerSimulation);
-  btnQuickTest.addEventListener('click', triggerSimulation);
+  btnQuickTest.addEventListener('click', triggerVerification);
 
   btnIncidentRecover.addEventListener('click', async () => {
     incRecoveryProgress.style.display = 'block';
-    incProgressBar.style.width = '30%';
+    incProgressBar.style.width = '35%';
     incProgressCounter.textContent = 'Restoring...';
 
     const res = await api.executeRecovery();
