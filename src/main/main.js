@@ -22,15 +22,16 @@ function getTrayIcon() {
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
-    width: 380,
-    height: 540,
-    minWidth: 360,
-    minHeight: 480,
+    width: 680,
+    height: 490,
+    minWidth: 620,
+    minHeight: 440,
     title: 'Guardian',
     icon: getTrayIcon(),
     show: true,
+    frame: false,
     autoHideMenuBar: true,
-    backgroundColor: '#1c1c1e',
+    backgroundColor: '#161618',
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.js'),
       contextIsolation: true,
