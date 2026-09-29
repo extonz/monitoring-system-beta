@@ -7,38 +7,44 @@
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="mac-toast-card" role="alertdialog" aria-labelledby="toast-title" aria-describedby="toast-msg">
-    <div class="mac-toast-header">
-      <div class="mac-toast-app">
-        <div class="mac-toast-icon" aria-hidden="true">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
-        </div>
-        <span class="mac-toast-appname">GUARDIAN</span>
-        <span class="mac-toast-dot" aria-hidden="true">•</span>
-        <span class="mac-toast-time">now</span>
-      </div>
-      <button class="mac-toast-close" id="btn-close" title="Dismiss" aria-label="Dismiss notification">
-        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
+  <div class="mac-banner" role="alert" aria-live="assertive">
+    
+    <!-- Dismiss Close Button -->
+    <button class="banner-close" id="btn-close" aria-label="Dismiss notification">
+      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <!-- Left: macOS Squircle App Icon -->
+    <div class="banner-icon-col">
+      <div class="mac-squircle-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         </svg>
-      </button>
+      </div>
     </div>
 
-    <div class="mac-toast-body">
-      <div class="mac-toast-title" id="toast-title">Unauthorized Activity Contained</div>
-      <p class="mac-toast-desc" id="toast-msg">
-        <span class="mac-toast-proc" id="toast-proc">unknown_payload.exe</span> was paused after attempting rapid file modifications.
-      </p>
+    <!-- Middle: Content -->
+    <div class="banner-content-col">
+      <div class="banner-meta">
+        <span class="banner-app-title">Guardian</span>
+        <span class="banner-dot">•</span>
+        <span class="banner-time">now</span>
+      </div>
+      <div class="banner-title" id="toast-title">Unauthorized Activity Paused</div>
+      <div class="banner-desc" id="toast-msg">
+        <span class="banner-proc" id="toast-proc">unknown_payload.exe</span> was paused to protect your files.
+      </div>
     </div>
 
-    <div class="mac-toast-actions">
-      <button class="mac-toast-btn secondary" id="btn-details" aria-label="Review incident details">Review</button>
-      <button class="mac-toast-btn primary" id="btn-recover" aria-label="Restore affected files">Restore Files</button>
-      <button class="mac-toast-btn tertiary" id="btn-allow" aria-label="Allow process to continue">Allow</button>
+    <!-- Right: macOS Action Stack -->
+    <div class="banner-actions-col">
+      <button class="mac-pill-btn primary" id="btn-recover" aria-label="Restore previous file states">Restore</button>
+      <button class="mac-pill-btn secondary" id="btn-details" aria-label="Review details in Guardian">Review</button>
     </div>
+
   </div>
 
   <script src="popup.js"></script>

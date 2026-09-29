@@ -63,11 +63,11 @@ function showToastPopup(incident) {
   const primaryDisplay = screen.getPrimaryDisplay();
   const { width, height } = primaryDisplay.workAreaSize;
 
-  const popupWidth = 360;
-  const popupHeight = 160;
+  const popupWidth = 380;
+  const popupHeight = 88;
   const margin = 16;
 
-  // Position at bottom-right corner just above Windows taskbar (macOS notification style)
+  // Position at bottom-right corner just above taskbar (authentic macOS banner style)
   const x = Math.round(width - popupWidth - margin);
   const y = Math.round(height - popupHeight - margin);
 
