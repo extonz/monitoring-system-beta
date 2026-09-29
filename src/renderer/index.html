@@ -13,9 +13,7 @@
     <header class="app-topbar">
       <div class="topbar-brand">
         <div class="brand-shield" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
+          <i data-lucide="shield" style="width: 14px; height: 14px; stroke-width: 2.4;"></i>
         </div>
         <span class="brand-title">Guardian</span>
         <span class="brand-scope-badge" id="brand-scope">All Volumes Active</span>
@@ -24,39 +22,22 @@
       <div class="topbar-controls">
         <!-- Quick Diagnostic Button -->
         <button id="btn-quick-test" class="topbar-btn" title="Verify Protection Response" aria-label="Verify Protection Response">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-            <polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
+          <i data-lucide="check-circle-2" style="width: 13px; height: 13px; stroke-width: 2;"></i>
         </button>
 
         <!-- Theme Toggle -->
         <button id="theme-toggle" class="topbar-btn" title="Toggle Theme" aria-label="Toggle Theme">
-          <svg id="theme-icon-sun" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="19.78" y2="4.22"></line>
-          </svg>
-          <svg id="theme-icon-moon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;" aria-hidden="true">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
+          <span id="theme-icon-sun"><i data-lucide="sun" style="width: 13px; height: 13px; stroke-width: 2;"></i></span>
+          <span id="theme-icon-moon" style="display: none;"><i data-lucide="moon" style="width: 13px; height: 13px; stroke-width: 2;"></i></span>
         </button>
 
         <!-- Standard Right-Aligned Window Controls (Minimize & Close to Tray) -->
         <button id="btn-window-min" class="topbar-btn window-ctrl" title="Minimize to Tray" aria-label="Minimize to Tray">
-          <svg width="10" height="2" viewBox="0 0 10 2" fill="currentColor">
-            <rect width="10" height="2" rx="1"/>
-          </svg>
+          <i data-lucide="minus" style="width: 11px; height: 11px; stroke-width: 2.2;"></i>
         </button>
 
         <button id="btn-window-close" class="topbar-btn window-ctrl close" title="Hide to Tray" aria-label="Hide to Tray">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
+          <i data-lucide="x" style="width: 11px; height: 11px; stroke-width: 2.4;"></i>
         </button>
       </div>
     </header>
@@ -67,34 +48,23 @@
       <!-- Navigation Rail -->
       <nav class="app-nav" role="tablist">
         <button class="nav-button active" data-tab="protection" role="tab" aria-selected="true" aria-controls="pane-protection">
-          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
+          <i data-lucide="shield" class="nav-icon" style="width: 15px; height: 15px; stroke-width: 2;"></i>
           <span class="nav-text">Protection</span>
         </button>
 
         <button class="nav-button" data-tab="incidents" id="nav-incidents" role="tab" aria-selected="false" aria-controls="pane-incidents">
-          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-            <line x1="12" y1="9" x2="12" y2="13"/>
-            <line x1="12" y1="17" x2="12.01" y2="17"/>
-          </svg>
+          <i data-lucide="triangle-alert" class="nav-icon" style="width: 15px; height: 15px; stroke-width: 2;"></i>
           <span class="nav-text">Quarantine</span>
           <span class="nav-counter" id="incident-count-badge" style="display: none;">1</span>
         </button>
 
         <button class="nav-button" data-tab="activity" role="tab" aria-selected="false" aria-controls="pane-activity">
-          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-          </svg>
+          <i data-lucide="activity" class="nav-icon" style="width: 15px; height: 15px; stroke-width: 2;"></i>
           <span class="nav-text">Activity</span>
         </button>
 
         <button class="nav-button" data-tab="preferences" role="tab" aria-selected="false" aria-controls="pane-preferences">
-          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
+          <i data-lucide="settings" class="nav-icon" style="width: 15px; height: 15px; stroke-width: 2;"></i>
           <span class="nav-text">Preferences</span>
         </button>
       </nav>
@@ -185,10 +155,7 @@
 
           <div id="no-incidents-view" class="empty-state-box">
             <div class="empty-glyph" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <polyline points="9 12 11 14 15 10"/>
-              </svg>
+              <i data-lucide="shield-check" style="width: 24px; height: 24px; stroke-width: 2;"></i>
             </div>
             <div class="empty-heading">No Contained Threats</div>
             <div class="empty-caption">All running processes are behaving within normal operating thresholds. If an anomalous process is contained, it will appear here for review.</div>
@@ -330,10 +297,11 @@
 
     <!-- Status Footer -->
     <footer class="app-footer">
-      <span>Guardian Local Defense • 100% On-Device Processing</span>
+      <span>Guardian Local Defense · 100% On-Device Processing</span>
     </footer>
   </div>
 
+  <script src="../../node_modules/lucide/dist/umd/lucide.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

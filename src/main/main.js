@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, screen, nativeImage } =
 const path = require('path');
 const fs = require('fs');
 
-const SecurityCoordinator = require('../engine/coordinator');
+const GuardianEngine = require('../engine/guardian');
 
 let mainWindow = null;
 let popupWindow = null;
@@ -209,8 +209,8 @@ app.whenReady().then(async () => {
   createMainWindow();
   setupTray();
 
-  // Initialize engine coordinator
-  coordinator = new SecurityCoordinator();
+  // Initialize Guardian engine
+  coordinator = new GuardianEngine();
 
   coordinator.on('state-changed', (state) => {
     if (mainWindow && !mainWindow.isDestroyed()) {

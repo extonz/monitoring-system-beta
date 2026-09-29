@@ -19,6 +19,7 @@
     "electron": "^33.2.1"
   },
   "dependencies": {
-    "chokidar": "^4.0.3"
+    "chokidar": "^4.0.3",
+    "lucide": "^1.48.0"
   }
 }

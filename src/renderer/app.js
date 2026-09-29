@@ -1,6 +1,7 @@
 // Guardian — Custom Precision Desktop Security Renderer Logic
 
 document.addEventListener('DOMContentLoaded', async () => {
+  if (window.lucide) window.lucide.createIcons();
   const api = window.guardianAPI;
 
   // Window Controls
@@ -63,6 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (tabName === 'activity') {
       loadTimeline();
     }
+    if (window.lucide) window.lucide.createIcons();
   }
 
   navButtons.forEach(btn => {
@@ -163,6 +165,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     renderFeed(state.recentEvents || []);
+    if (window.lucide) window.lucide.createIcons();
   }
 
   function renderIncident(inc) {

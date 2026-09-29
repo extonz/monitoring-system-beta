@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  if (window.lucide) window.lucide.createIcons();
   const api = window.guardianAPI;
 
   const toastProc = document.getElementById('toast-proc');
